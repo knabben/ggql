@@ -1,6 +1,7 @@
 package tree
 
 import "fmt"
+
 type Node struct {
 	Data int64
 	Next *Node
