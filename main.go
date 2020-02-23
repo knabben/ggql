@@ -6,15 +6,16 @@ import (
 )
 
 var document = `query {
-	  __schema {
-		queryType {
-			fields {
-				name
-			}
-        }
-	  }
-    }`
-
+  __schema {
+    queryType {
+      fields {
+        name
+        description
+        isDeprecated
+      }
+    }
+  }
+}`
 
 func main() {
 	var s graph.Schema
