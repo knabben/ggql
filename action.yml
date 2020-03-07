@@ -1,0 +1,7 @@
+name: "GraphQL Explorer"
+description: "GraphQL explorer"
+inputs:
+  URL:
+    description: "GraphQL URL endpoint"
+    required: true
+  
