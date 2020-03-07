@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
@@ -14,8 +15,10 @@ import (
 // ObjectTypeCreate is the builder for creating a ObjectType entity.
 type ObjectTypeCreate struct {
 	config
-	name   *string
-	fields map[int]struct{}
+	name        *string
+	kind        *string
+	description *string
+	fields      map[int]struct{}
 }
 
 // SetName sets the name field.
@@ -24,11 +27,15 @@ func (otc *ObjectTypeCreate) SetName(s string) *ObjectTypeCreate {
 	return otc
 }
 
-// SetNillableName sets the name field if the given value is not nil.
-func (otc *ObjectTypeCreate) SetNillableName(s *string) *ObjectTypeCreate {
-	if s != nil {
-		otc.SetName(*s)
-	}
+// SetKind sets the kind field.
+func (otc *ObjectTypeCreate) SetKind(s string) *ObjectTypeCreate {
+	otc.kind = &s
+	return otc
+}
+
+// SetDescription sets the description field.
+func (otc *ObjectTypeCreate) SetDescription(s string) *ObjectTypeCreate {
+	otc.description = &s
 	return otc
 }
 
@@ -55,8 +62,13 @@ func (otc *ObjectTypeCreate) AddFields(f ...*FieldType) *ObjectTypeCreate {
 // Save creates the ObjectType in the database.
 func (otc *ObjectTypeCreate) Save(ctx context.Context) (*ObjectType, error) {
 	if otc.name == nil {
-		v := objecttype.DefaultName
-		otc.name = &v
+		return nil, errors.New("ent: missing required field \"name\"")
+	}
+	if otc.kind == nil {
+		return nil, errors.New("ent: missing required field \"kind\"")
+	}
+	if otc.description == nil {
+		return nil, errors.New("ent: missing required field \"description\"")
 	}
 	return otc.sqlSave(ctx)
 }
@@ -88,6 +100,22 @@ func (otc *ObjectTypeCreate) sqlSave(ctx context.Context) (*ObjectType, error) {
 			Column: objecttype.FieldName,
 		})
 		ot.Name = *value
+	}
+	if value := otc.kind; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: objecttype.FieldKind,
+		})
+		ot.Kind = *value
+	}
+	if value := otc.description; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: objecttype.FieldDescription,
+		})
+		ot.Description = *value
 	}
 	if nodes := otc.fields; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

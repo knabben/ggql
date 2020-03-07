@@ -98,6 +98,20 @@ func Name(v string) predicate.ObjectType {
 	})
 }
 
+// Kind applies equality check predicate on the "kind" field. It's identical to KindEQ.
+func Kind(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldKind), v))
+	})
+}
+
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDescription), v))
+	})
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.ObjectType {
 	return predicate.ObjectType(func(s *sql.Selector) {
@@ -206,6 +220,228 @@ func NameEqualFold(v string) predicate.ObjectType {
 func NameContainsFold(v string) predicate.ObjectType {
 	return predicate.ObjectType(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldName), v))
+	})
+}
+
+// KindEQ applies the EQ predicate on the "kind" field.
+func KindEQ(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldKind), v))
+	})
+}
+
+// KindNEQ applies the NEQ predicate on the "kind" field.
+func KindNEQ(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldKind), v))
+	})
+}
+
+// KindIn applies the In predicate on the "kind" field.
+func KindIn(vs ...string) predicate.ObjectType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.ObjectType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldKind), v...))
+	})
+}
+
+// KindNotIn applies the NotIn predicate on the "kind" field.
+func KindNotIn(vs ...string) predicate.ObjectType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.ObjectType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldKind), v...))
+	})
+}
+
+// KindGT applies the GT predicate on the "kind" field.
+func KindGT(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldKind), v))
+	})
+}
+
+// KindGTE applies the GTE predicate on the "kind" field.
+func KindGTE(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldKind), v))
+	})
+}
+
+// KindLT applies the LT predicate on the "kind" field.
+func KindLT(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldKind), v))
+	})
+}
+
+// KindLTE applies the LTE predicate on the "kind" field.
+func KindLTE(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldKind), v))
+	})
+}
+
+// KindContains applies the Contains predicate on the "kind" field.
+func KindContains(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldKind), v))
+	})
+}
+
+// KindHasPrefix applies the HasPrefix predicate on the "kind" field.
+func KindHasPrefix(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldKind), v))
+	})
+}
+
+// KindHasSuffix applies the HasSuffix predicate on the "kind" field.
+func KindHasSuffix(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldKind), v))
+	})
+}
+
+// KindEqualFold applies the EqualFold predicate on the "kind" field.
+func KindEqualFold(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldKind), v))
+	})
+}
+
+// KindContainsFold applies the ContainsFold predicate on the "kind" field.
+func KindContainsFold(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldKind), v))
+	})
+}
+
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDescription), v))
+	})
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDescription), v))
+	})
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.ObjectType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.ObjectType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDescription), v...))
+	})
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.ObjectType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.ObjectType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDescription), v...))
+	})
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDescription), v))
+	})
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDescription), v))
+	})
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDescription), v))
+	})
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDescription), v))
+	})
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDescription), v))
+	})
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDescription), v))
+	})
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDescription), v))
+	})
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDescription), v))
+	})
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.ObjectType {
+	return predicate.ObjectType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDescription), v))
 	})
 }
 

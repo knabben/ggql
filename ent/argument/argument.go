@@ -9,8 +9,12 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name vertex property in the database.
 	FieldName = "name"
-	// FieldKind holds the string denoting the kind vertex property in the database.
-	FieldKind = "kind"
+	// FieldDescription holds the string denoting the description vertex property in the database.
+	FieldDescription = "description"
+	// FieldTypeKind holds the string denoting the type_kind vertex property in the database.
+	FieldTypeKind = "type_kind"
+	// FieldTypeName holds the string denoting the type_name vertex property in the database.
+	FieldTypeName = "type_name"
 
 	// Table holds the table name of the argument in the database.
 	Table = "arguments"
@@ -20,7 +24,9 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
-	FieldKind,
+	FieldDescription,
+	FieldTypeKind,
+	FieldTypeName,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Argument type.

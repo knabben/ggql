@@ -17,6 +17,14 @@ type FieldType struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Description holds the value of the "description" field.
+	Description string `json:"description,omitempty"`
+	// IsDeprecated holds the value of the "is_deprecated" field.
+	IsDeprecated bool `json:"is_deprecated,omitempty"`
+	// TypeKind holds the value of the "type_kind" field.
+	TypeKind bool `json:"type_kind,omitempty"`
+	// TypeName holds the value of the "type_name" field.
+	TypeName bool `json:"type_name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FieldTypeQuery when eager-loading is set.
 	Edges              FieldTypeEdges `json:"edges"`
@@ -46,6 +54,10 @@ func (*FieldType) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
 		&sql.NullString{}, // name
+		&sql.NullString{}, // description
+		&sql.NullBool{},   // is_deprecated
+		&sql.NullBool{},   // type_kind
+		&sql.NullBool{},   // type_name
 	}
 }
 
@@ -73,7 +85,27 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		ft.Name = value.String
 	}
-	values = values[1:]
+	if value, ok := values[1].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field description", values[1])
+	} else if value.Valid {
+		ft.Description = value.String
+	}
+	if value, ok := values[2].(*sql.NullBool); !ok {
+		return fmt.Errorf("unexpected type %T for field is_deprecated", values[2])
+	} else if value.Valid {
+		ft.IsDeprecated = value.Bool
+	}
+	if value, ok := values[3].(*sql.NullBool); !ok {
+		return fmt.Errorf("unexpected type %T for field type_kind", values[3])
+	} else if value.Valid {
+		ft.TypeKind = value.Bool
+	}
+	if value, ok := values[4].(*sql.NullBool); !ok {
+		return fmt.Errorf("unexpected type %T for field type_name", values[4])
+	} else if value.Valid {
+		ft.TypeName = value.Bool
+	}
+	values = values[5:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field object_type_fields", value)
@@ -115,6 +147,14 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", ft.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(ft.Name)
+	builder.WriteString(", description=")
+	builder.WriteString(ft.Description)
+	builder.WriteString(", is_deprecated=")
+	builder.WriteString(fmt.Sprintf("%v", ft.IsDeprecated))
+	builder.WriteString(", type_kind=")
+	builder.WriteString(fmt.Sprintf("%v", ft.TypeKind))
+	builder.WriteString(", type_name=")
+	builder.WriteString(fmt.Sprintf("%v", ft.TypeName))
 	builder.WriteByte(')')
 	return builder.String()
 }

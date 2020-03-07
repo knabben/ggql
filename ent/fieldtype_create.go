@@ -15,13 +15,41 @@ import (
 // FieldTypeCreate is the builder for creating a FieldType entity.
 type FieldTypeCreate struct {
 	config
-	name      *string
-	arguments map[int]struct{}
+	name          *string
+	description   *string
+	is_deprecated *bool
+	type_kind     *bool
+	type_name     *bool
+	arguments     map[int]struct{}
 }
 
 // SetName sets the name field.
 func (ftc *FieldTypeCreate) SetName(s string) *FieldTypeCreate {
 	ftc.name = &s
+	return ftc
+}
+
+// SetDescription sets the description field.
+func (ftc *FieldTypeCreate) SetDescription(s string) *FieldTypeCreate {
+	ftc.description = &s
+	return ftc
+}
+
+// SetIsDeprecated sets the is_deprecated field.
+func (ftc *FieldTypeCreate) SetIsDeprecated(b bool) *FieldTypeCreate {
+	ftc.is_deprecated = &b
+	return ftc
+}
+
+// SetTypeKind sets the type_kind field.
+func (ftc *FieldTypeCreate) SetTypeKind(b bool) *FieldTypeCreate {
+	ftc.type_kind = &b
+	return ftc
+}
+
+// SetTypeName sets the type_name field.
+func (ftc *FieldTypeCreate) SetTypeName(b bool) *FieldTypeCreate {
+	ftc.type_name = &b
 	return ftc
 }
 
@@ -49,6 +77,18 @@ func (ftc *FieldTypeCreate) AddArguments(a ...*Argument) *FieldTypeCreate {
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if ftc.name == nil {
 		return nil, errors.New("ent: missing required field \"name\"")
+	}
+	if ftc.description == nil {
+		return nil, errors.New("ent: missing required field \"description\"")
+	}
+	if ftc.is_deprecated == nil {
+		return nil, errors.New("ent: missing required field \"is_deprecated\"")
+	}
+	if ftc.type_kind == nil {
+		return nil, errors.New("ent: missing required field \"type_kind\"")
+	}
+	if ftc.type_name == nil {
+		return nil, errors.New("ent: missing required field \"type_name\"")
 	}
 	return ftc.sqlSave(ctx)
 }
@@ -80,6 +120,38 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldName,
 		})
 		ft.Name = *value
+	}
+	if value := ftc.description; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: fieldtype.FieldDescription,
+		})
+		ft.Description = *value
+	}
+	if value := ftc.is_deprecated; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  *value,
+			Column: fieldtype.FieldIsDeprecated,
+		})
+		ft.IsDeprecated = *value
+	}
+	if value := ftc.type_kind; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  *value,
+			Column: fieldtype.FieldTypeKind,
+		})
+		ft.TypeKind = *value
+	}
+	if value := ftc.type_name; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  *value,
+			Column: fieldtype.FieldTypeName,
+		})
+		ft.TypeName = *value
 	}
 	if nodes := ftc.arguments; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

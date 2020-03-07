@@ -17,6 +17,8 @@ import (
 type ObjectTypeUpdate struct {
 	config
 	name          *string
+	kind          *string
+	description   *string
 	fields        map[int]struct{}
 	removedFields map[int]struct{}
 	predicates    []predicate.ObjectType
@@ -34,11 +36,15 @@ func (otu *ObjectTypeUpdate) SetName(s string) *ObjectTypeUpdate {
 	return otu
 }
 
-// SetNillableName sets the name field if the given value is not nil.
-func (otu *ObjectTypeUpdate) SetNillableName(s *string) *ObjectTypeUpdate {
-	if s != nil {
-		otu.SetName(*s)
-	}
+// SetKind sets the kind field.
+func (otu *ObjectTypeUpdate) SetKind(s string) *ObjectTypeUpdate {
+	otu.kind = &s
+	return otu
+}
+
+// SetDescription sets the description field.
+func (otu *ObjectTypeUpdate) SetDescription(s string) *ObjectTypeUpdate {
+	otu.description = &s
 	return otu
 }
 
@@ -134,6 +140,20 @@ func (otu *ObjectTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: objecttype.FieldName,
 		})
 	}
+	if value := otu.kind; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: objecttype.FieldKind,
+		})
+	}
+	if value := otu.description; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: objecttype.FieldDescription,
+		})
+	}
 	if nodes := otu.removedFields; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -186,6 +206,8 @@ type ObjectTypeUpdateOne struct {
 	config
 	id            int
 	name          *string
+	kind          *string
+	description   *string
 	fields        map[int]struct{}
 	removedFields map[int]struct{}
 }
@@ -196,11 +218,15 @@ func (otuo *ObjectTypeUpdateOne) SetName(s string) *ObjectTypeUpdateOne {
 	return otuo
 }
 
-// SetNillableName sets the name field if the given value is not nil.
-func (otuo *ObjectTypeUpdateOne) SetNillableName(s *string) *ObjectTypeUpdateOne {
-	if s != nil {
-		otuo.SetName(*s)
-	}
+// SetKind sets the kind field.
+func (otuo *ObjectTypeUpdateOne) SetKind(s string) *ObjectTypeUpdateOne {
+	otuo.kind = &s
+	return otuo
+}
+
+// SetDescription sets the description field.
+func (otuo *ObjectTypeUpdateOne) SetDescription(s string) *ObjectTypeUpdateOne {
+	otuo.description = &s
 	return otuo
 }
 
@@ -288,6 +314,20 @@ func (otuo *ObjectTypeUpdateOne) sqlSave(ctx context.Context) (ot *ObjectType, e
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: objecttype.FieldName,
+		})
+	}
+	if value := otuo.kind; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: objecttype.FieldKind,
+		})
+	}
+	if value := otuo.description; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: objecttype.FieldDescription,
 		})
 	}
 	if nodes := otuo.removedFields; len(nodes) > 0 {

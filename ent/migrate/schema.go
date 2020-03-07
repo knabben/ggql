@@ -3,8 +3,6 @@
 package migrate
 
 import (
-	"github.com/knabben/ggql/ent/objecttype"
-
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -14,7 +12,9 @@ var (
 	ArgumentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "kind", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+		{Name: "type_kind", Type: field.TypeString},
+		{Name: "type_name", Type: field.TypeString},
 		{Name: "field_type_arguments", Type: field.TypeInt, Nullable: true},
 	}
 	// ArgumentsTable holds the schema information for the "arguments" table.
@@ -25,7 +25,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "arguments_field_types_arguments",
-				Columns: []*schema.Column{ArgumentsColumns[3]},
+				Columns: []*schema.Column{ArgumentsColumns[5]},
 
 				RefColumns: []*schema.Column{FieldTypesColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -36,6 +36,10 @@ var (
 	FieldTypesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+		{Name: "is_deprecated", Type: field.TypeBool},
+		{Name: "type_kind", Type: field.TypeBool},
+		{Name: "type_name", Type: field.TypeBool},
 		{Name: "object_type_fields", Type: field.TypeInt, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
@@ -46,7 +50,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "field_types_object_types_fields",
-				Columns: []*schema.Column{FieldTypesColumns[2]},
+				Columns: []*schema.Column{FieldTypesColumns[6]},
 
 				RefColumns: []*schema.Column{ObjectTypesColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -56,7 +60,9 @@ var (
 	// ObjectTypesColumns holds the columns for the "object_types" table.
 	ObjectTypesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Default: objecttype.DefaultName},
+		{Name: "name", Type: field.TypeString},
+		{Name: "kind", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
 	}
 	// ObjectTypesTable holds the schema information for the "object_types" table.
 	ObjectTypesTable = &schema.Table{

@@ -17,8 +17,12 @@ type Argument struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// Kind holds the value of the "kind" field.
-	Kind                 string `json:"kind,omitempty"`
+	// Description holds the value of the "description" field.
+	Description string `json:"description,omitempty"`
+	// TypeKind holds the value of the "type_kind" field.
+	TypeKind string `json:"type_kind,omitempty"`
+	// TypeName holds the value of the "type_name" field.
+	TypeName             string `json:"type_name,omitempty"`
 	field_type_arguments *int
 }
 
@@ -27,7 +31,9 @@ func (*Argument) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
 		&sql.NullString{}, // name
-		&sql.NullString{}, // kind
+		&sql.NullString{}, // description
+		&sql.NullString{}, // type_kind
+		&sql.NullString{}, // type_name
 	}
 }
 
@@ -56,11 +62,21 @@ func (a *Argument) assignValues(values ...interface{}) error {
 		a.Name = value.String
 	}
 	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field kind", values[1])
+		return fmt.Errorf("unexpected type %T for field description", values[1])
 	} else if value.Valid {
-		a.Kind = value.String
+		a.Description = value.String
 	}
-	values = values[2:]
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field type_kind", values[2])
+	} else if value.Valid {
+		a.TypeKind = value.String
+	}
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field type_name", values[3])
+	} else if value.Valid {
+		a.TypeName = value.String
+	}
+	values = values[4:]
 	if len(values) == len(argument.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field field_type_arguments", value)
@@ -97,8 +113,12 @@ func (a *Argument) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", a.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(a.Name)
-	builder.WriteString(", kind=")
-	builder.WriteString(a.Kind)
+	builder.WriteString(", description=")
+	builder.WriteString(a.Description)
+	builder.WriteString(", type_kind=")
+	builder.WriteString(a.TypeKind)
+	builder.WriteString(", type_name=")
+	builder.WriteString(a.TypeName)
 	builder.WriteByte(')')
 	return builder.String()
 }

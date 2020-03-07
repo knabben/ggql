@@ -17,6 +17,10 @@ import (
 type FieldTypeUpdate struct {
 	config
 	name             *string
+	description      *string
+	is_deprecated    *bool
+	type_kind        *bool
+	type_name        *bool
 	arguments        map[int]struct{}
 	removedArguments map[int]struct{}
 	predicates       []predicate.FieldType
@@ -31,6 +35,30 @@ func (ftu *FieldTypeUpdate) Where(ps ...predicate.FieldType) *FieldTypeUpdate {
 // SetName sets the name field.
 func (ftu *FieldTypeUpdate) SetName(s string) *FieldTypeUpdate {
 	ftu.name = &s
+	return ftu
+}
+
+// SetDescription sets the description field.
+func (ftu *FieldTypeUpdate) SetDescription(s string) *FieldTypeUpdate {
+	ftu.description = &s
+	return ftu
+}
+
+// SetIsDeprecated sets the is_deprecated field.
+func (ftu *FieldTypeUpdate) SetIsDeprecated(b bool) *FieldTypeUpdate {
+	ftu.is_deprecated = &b
+	return ftu
+}
+
+// SetTypeKind sets the type_kind field.
+func (ftu *FieldTypeUpdate) SetTypeKind(b bool) *FieldTypeUpdate {
+	ftu.type_kind = &b
+	return ftu
+}
+
+// SetTypeName sets the type_name field.
+func (ftu *FieldTypeUpdate) SetTypeName(b bool) *FieldTypeUpdate {
+	ftu.type_name = &b
 	return ftu
 }
 
@@ -126,6 +154,34 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldName,
 		})
 	}
+	if value := ftu.description; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: fieldtype.FieldDescription,
+		})
+	}
+	if value := ftu.is_deprecated; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  *value,
+			Column: fieldtype.FieldIsDeprecated,
+		})
+	}
+	if value := ftu.type_kind; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  *value,
+			Column: fieldtype.FieldTypeKind,
+		})
+	}
+	if value := ftu.type_name; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  *value,
+			Column: fieldtype.FieldTypeName,
+		})
+	}
 	if nodes := ftu.removedArguments; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -178,6 +234,10 @@ type FieldTypeUpdateOne struct {
 	config
 	id               int
 	name             *string
+	description      *string
+	is_deprecated    *bool
+	type_kind        *bool
+	type_name        *bool
 	arguments        map[int]struct{}
 	removedArguments map[int]struct{}
 }
@@ -185,6 +245,30 @@ type FieldTypeUpdateOne struct {
 // SetName sets the name field.
 func (ftuo *FieldTypeUpdateOne) SetName(s string) *FieldTypeUpdateOne {
 	ftuo.name = &s
+	return ftuo
+}
+
+// SetDescription sets the description field.
+func (ftuo *FieldTypeUpdateOne) SetDescription(s string) *FieldTypeUpdateOne {
+	ftuo.description = &s
+	return ftuo
+}
+
+// SetIsDeprecated sets the is_deprecated field.
+func (ftuo *FieldTypeUpdateOne) SetIsDeprecated(b bool) *FieldTypeUpdateOne {
+	ftuo.is_deprecated = &b
+	return ftuo
+}
+
+// SetTypeKind sets the type_kind field.
+func (ftuo *FieldTypeUpdateOne) SetTypeKind(b bool) *FieldTypeUpdateOne {
+	ftuo.type_kind = &b
+	return ftuo
+}
+
+// SetTypeName sets the type_name field.
+func (ftuo *FieldTypeUpdateOne) SetTypeName(b bool) *FieldTypeUpdateOne {
+	ftuo.type_name = &b
 	return ftuo
 }
 
@@ -272,6 +356,34 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: fieldtype.FieldName,
+		})
+	}
+	if value := ftuo.description; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: fieldtype.FieldDescription,
+		})
+	}
+	if value := ftuo.is_deprecated; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  *value,
+			Column: fieldtype.FieldIsDeprecated,
+		})
+	}
+	if value := ftuo.type_kind; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  *value,
+			Column: fieldtype.FieldTypeKind,
+		})
+	}
+	if value := ftuo.type_name; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  *value,
+			Column: fieldtype.FieldTypeName,
 		})
 	}
 	if nodes := ftuo.removedArguments; len(nodes) > 0 {

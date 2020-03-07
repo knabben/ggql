@@ -14,7 +14,9 @@ type ObjectType struct {
 // Fields of the ObjectType.
 func (ObjectType) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").Default("unknown"),
+		field.String("name"),
+		field.String("kind"),
+		field.String("description"),
 	}
 }
 

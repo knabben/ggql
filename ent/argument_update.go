@@ -15,9 +15,11 @@ import (
 // ArgumentUpdate is the builder for updating Argument entities.
 type ArgumentUpdate struct {
 	config
-	name       *string
-	kind       *string
-	predicates []predicate.Argument
+	name        *string
+	description *string
+	type_kind   *string
+	type_name   *string
+	predicates  []predicate.Argument
 }
 
 // Where adds a new predicate for the builder.
@@ -32,9 +34,21 @@ func (au *ArgumentUpdate) SetName(s string) *ArgumentUpdate {
 	return au
 }
 
-// SetKind sets the kind field.
-func (au *ArgumentUpdate) SetKind(s string) *ArgumentUpdate {
-	au.kind = &s
+// SetDescription sets the description field.
+func (au *ArgumentUpdate) SetDescription(s string) *ArgumentUpdate {
+	au.description = &s
+	return au
+}
+
+// SetTypeKind sets the type_kind field.
+func (au *ArgumentUpdate) SetTypeKind(s string) *ArgumentUpdate {
+	au.type_kind = &s
+	return au
+}
+
+// SetTypeName sets the type_name field.
+func (au *ArgumentUpdate) SetTypeName(s string) *ArgumentUpdate {
+	au.type_name = &s
 	return au
 }
 
@@ -90,11 +104,25 @@ func (au *ArgumentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: argument.FieldName,
 		})
 	}
-	if value := au.kind; value != nil {
+	if value := au.description; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
-			Column: argument.FieldKind,
+			Column: argument.FieldDescription,
+		})
+	}
+	if value := au.type_kind; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: argument.FieldTypeKind,
+		})
+	}
+	if value := au.type_name; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: argument.FieldTypeName,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
@@ -109,9 +137,11 @@ func (au *ArgumentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // ArgumentUpdateOne is the builder for updating a single Argument entity.
 type ArgumentUpdateOne struct {
 	config
-	id   int
-	name *string
-	kind *string
+	id          int
+	name        *string
+	description *string
+	type_kind   *string
+	type_name   *string
 }
 
 // SetName sets the name field.
@@ -120,9 +150,21 @@ func (auo *ArgumentUpdateOne) SetName(s string) *ArgumentUpdateOne {
 	return auo
 }
 
-// SetKind sets the kind field.
-func (auo *ArgumentUpdateOne) SetKind(s string) *ArgumentUpdateOne {
-	auo.kind = &s
+// SetDescription sets the description field.
+func (auo *ArgumentUpdateOne) SetDescription(s string) *ArgumentUpdateOne {
+	auo.description = &s
+	return auo
+}
+
+// SetTypeKind sets the type_kind field.
+func (auo *ArgumentUpdateOne) SetTypeKind(s string) *ArgumentUpdateOne {
+	auo.type_kind = &s
+	return auo
+}
+
+// SetTypeName sets the type_name field.
+func (auo *ArgumentUpdateOne) SetTypeName(s string) *ArgumentUpdateOne {
+	auo.type_name = &s
 	return auo
 }
 
@@ -172,11 +214,25 @@ func (auo *ArgumentUpdateOne) sqlSave(ctx context.Context) (a *Argument, err err
 			Column: argument.FieldName,
 		})
 	}
-	if value := auo.kind; value != nil {
+	if value := auo.description; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
-			Column: argument.FieldKind,
+			Column: argument.FieldDescription,
+		})
+	}
+	if value := auo.type_kind; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: argument.FieldTypeKind,
+		})
+	}
+	if value := auo.type_name; value != nil {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: argument.FieldTypeName,
 		})
 	}
 	a = &Argument{config: auo.config}

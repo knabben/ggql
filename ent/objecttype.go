@@ -17,6 +17,10 @@ type ObjectType struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Kind holds the value of the "kind" field.
+	Kind string `json:"kind,omitempty"`
+	// Description holds the value of the "description" field.
+	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ObjectTypeQuery when eager-loading is set.
 	Edges ObjectTypeEdges `json:"edges"`
@@ -45,6 +49,8 @@ func (*ObjectType) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
 		&sql.NullString{}, // name
+		&sql.NullString{}, // kind
+		&sql.NullString{}, // description
 	}
 }
 
@@ -64,6 +70,16 @@ func (ot *ObjectType) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field name", values[0])
 	} else if value.Valid {
 		ot.Name = value.String
+	}
+	if value, ok := values[1].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field kind", values[1])
+	} else if value.Valid {
+		ot.Kind = value.String
+	}
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field description", values[2])
+	} else if value.Valid {
+		ot.Description = value.String
 	}
 	return nil
 }
@@ -98,6 +114,10 @@ func (ot *ObjectType) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", ot.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(ot.Name)
+	builder.WriteString(", kind=")
+	builder.WriteString(ot.Kind)
+	builder.WriteString(", description=")
+	builder.WriteString(ot.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

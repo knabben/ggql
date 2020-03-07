@@ -2,10 +2,6 @@
 
 package objecttype
 
-import (
-	"github.com/knabben/ggql/ent/schema"
-)
-
 const (
 	// Label holds the string label denoting the objecttype type in the database.
 	Label = "object_type"
@@ -13,6 +9,10 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name vertex property in the database.
 	FieldName = "name"
+	// FieldKind holds the string denoting the kind vertex property in the database.
+	FieldKind = "kind"
+	// FieldDescription holds the string denoting the description vertex property in the database.
+	FieldDescription = "description"
 
 	// Table holds the table name of the objecttype in the database.
 	Table = "object_types"
@@ -29,13 +29,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldKind,
+	FieldDescription,
 }
-
-var (
-	fields = schema.ObjectType{}.Fields()
-
-	// descName is the schema descriptor for name field.
-	descName = fields[0].Descriptor()
-	// DefaultName holds the default value on creation for the name field.
-	DefaultName = descName.Default.(string)
-)

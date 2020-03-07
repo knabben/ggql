@@ -14,8 +14,10 @@ import (
 // ArgumentCreate is the builder for creating a Argument entity.
 type ArgumentCreate struct {
 	config
-	name *string
-	kind *string
+	name        *string
+	description *string
+	type_kind   *string
+	type_name   *string
 }
 
 // SetName sets the name field.
@@ -24,9 +26,21 @@ func (ac *ArgumentCreate) SetName(s string) *ArgumentCreate {
 	return ac
 }
 
-// SetKind sets the kind field.
-func (ac *ArgumentCreate) SetKind(s string) *ArgumentCreate {
-	ac.kind = &s
+// SetDescription sets the description field.
+func (ac *ArgumentCreate) SetDescription(s string) *ArgumentCreate {
+	ac.description = &s
+	return ac
+}
+
+// SetTypeKind sets the type_kind field.
+func (ac *ArgumentCreate) SetTypeKind(s string) *ArgumentCreate {
+	ac.type_kind = &s
+	return ac
+}
+
+// SetTypeName sets the type_name field.
+func (ac *ArgumentCreate) SetTypeName(s string) *ArgumentCreate {
+	ac.type_name = &s
 	return ac
 }
 
@@ -35,8 +49,14 @@ func (ac *ArgumentCreate) Save(ctx context.Context) (*Argument, error) {
 	if ac.name == nil {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if ac.kind == nil {
-		return nil, errors.New("ent: missing required field \"kind\"")
+	if ac.description == nil {
+		return nil, errors.New("ent: missing required field \"description\"")
+	}
+	if ac.type_kind == nil {
+		return nil, errors.New("ent: missing required field \"type_kind\"")
+	}
+	if ac.type_name == nil {
+		return nil, errors.New("ent: missing required field \"type_name\"")
 	}
 	return ac.sqlSave(ctx)
 }
@@ -69,13 +89,29 @@ func (ac *ArgumentCreate) sqlSave(ctx context.Context) (*Argument, error) {
 		})
 		a.Name = *value
 	}
-	if value := ac.kind; value != nil {
+	if value := ac.description; value != nil {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
-			Column: argument.FieldKind,
+			Column: argument.FieldDescription,
 		})
-		a.Kind = *value
+		a.Description = *value
+	}
+	if value := ac.type_kind; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: argument.FieldTypeKind,
+		})
+		a.TypeKind = *value
+	}
+	if value := ac.type_name; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: argument.FieldTypeName,
+		})
+		a.TypeName = *value
 	}
 	if err := sqlgraph.CreateNode(ctx, ac.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

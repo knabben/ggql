@@ -15,6 +15,10 @@ type FieldType struct {
 func (FieldType) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
+		field.String("description"),
+		field.Bool("is_deprecated"),
+		field.Bool("type_kind"),
+		field.Bool("type_name"),
 	}
 }
 

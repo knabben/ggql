@@ -32,7 +32,9 @@ func ExampleArgument() {
 	a := client.Argument.
 		Create().
 		SetName("string").
-		SetKind("string").
+		SetDescription("string").
+		SetTypeKind("string").
+		SetTypeName("string").
 		SaveX(ctx)
 	log.Println("argument created:", a)
 
@@ -55,7 +57,9 @@ func ExampleFieldType() {
 	a0 := client.Argument.
 		Create().
 		SetName("string").
-		SetKind("string").
+		SetDescription("string").
+		SetTypeKind("string").
+		SetTypeName("string").
 		SaveX(ctx)
 	log.Println("argument created:", a0)
 
@@ -63,6 +67,10 @@ func ExampleFieldType() {
 	ft := client.FieldType.
 		Create().
 		SetName("string").
+		SetDescription("string").
+		SetIsDeprecated(true).
+		SetTypeKind(true).
+		SetTypeName(true).
 		AddArguments(a0).
 		SaveX(ctx)
 	log.Println("fieldtype created:", ft)
@@ -91,6 +99,10 @@ func ExampleObjectType() {
 	ft0 := client.FieldType.
 		Create().
 		SetName("string").
+		SetDescription("string").
+		SetIsDeprecated(true).
+		SetTypeKind(true).
+		SetTypeName(true).
 		SaveX(ctx)
 	log.Println("fieldtype created:", ft0)
 
@@ -98,6 +110,8 @@ func ExampleObjectType() {
 	ot := client.ObjectType.
 		Create().
 		SetName("string").
+		SetKind("string").
+		SetDescription("string").
 		AddFields(ft0).
 		SaveX(ctx)
 	log.Println("objecttype created:", ot)
