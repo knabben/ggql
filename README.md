@@ -14,5 +14,9 @@ From the features we can enumerate:
 Scraping schema
 ---
 
+[knabben/gql-pull](https://github.com/knabben/gql-pull)
+
 Compare and generate artifact
 ---
+
+[knabben/gql-diff](https://github.com/knabben/gql-diff)

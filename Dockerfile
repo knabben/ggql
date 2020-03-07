@@ -4,4 +4,4 @@ WORKDIR /app
 COPY . /app/
 RUN go build -o gql .
 
-ENTRYPOINT ["./gql"]
+ENTRYPOINT ["./entrypoint.sh"]
