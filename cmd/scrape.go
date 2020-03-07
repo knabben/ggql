@@ -10,27 +10,32 @@ import (
 	"log"
 )
 
+var (
+	sqlite, url string
+	result      client.Schema
+	ctx         = context.Background()
+	variables   = map[string]interface{}{}
+	uri         = fmt.Sprintf("file:%s?cache=shared&_fk=1", sqlite)
+)
+
 func init() {
-	scrapeCmd.Flags().StringVarP(&url, "url", "u", "http://localhost:8000/graphql/","GraphQL URI")
+	scrapeCmd.Flags().StringVarP(&url, "url", "u", "http://localhost:8000/graphql/", "GraphQL URI")
+	scrapeCmd.Flags().StringVarP(&sqlite, "sqlite", "s", "sqlite3", "SQLite3 database")
+
 	rootCmd.AddCommand(scrapeCmd)
 }
 
 var scrapeCmd = &cobra.Command{
-	Use: "scrape",
+	Use:   "scrape",
 	Short: "scrape",
 	Run: func(cmd *cobra.Command, args []string) {
-		var (
-			result client.Schema
-			ctx = context.Background()
-			variables = map[string]interface{}{}
-		)
 
 		// GraphQL client request and response serializer
 		c := client.NewClient(url)
 		c.GraphQL(client.BuildIntrospectionQuery(), variables, &result)
 
 		// Start database to dump graph
-		database := database.NewDatabase("file:sqlite3?_fk=1")
+		database := database.NewDatabase(sqlite)
 		client, err := database.Connect()
 		if err != nil {
 			log.Fatalf("%v", err)
@@ -44,7 +49,6 @@ var scrapeCmd = &cobra.Command{
 		CreateObjectType(ctx, client, result)
 	},
 }
-
 
 func CreateObjectType(ctx context.Context, client *ent.Client, result client.Schema) (o *ent.ObjectType, err error) {
 	// start versioning schema
@@ -69,6 +73,5 @@ func CreateObjectType(ctx context.Context, client *ent.Client, result client.Sch
 		return nil, fmt.Errorf("failed creating user: %v", err)
 	}
 	log.Println("object was created: ", o)
-
 	return o, nil
 }

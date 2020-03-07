@@ -8,8 +8,6 @@ type Database struct {
 	dbURI string
 }
 
-var uri = "file:ent1?cache=shared&_fk=1"
-
 func NewDatabase(uri string) *Database {
 	return &Database{dbURI: uri}
 }
