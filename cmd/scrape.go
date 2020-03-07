@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/knabben/ggql/ent"
 	"github.com/knabben/ggql/pkg/client"
+	"github.com/knabben/ggql/pkg/database"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -18,20 +19,29 @@ var scrapeCmd = &cobra.Command{
 	Use: "scrape",
 	Short: "scrape",
 	Run: func(cmd *cobra.Command, args []string) {
+		var (
+			result client.Schema
+			ctx = context.Background()
+			variables = map[string]interface{}{}
+		)
+
+		// GraphQL client request and response serializer
 		c := client.NewClient(url)
 		c.GraphQL(client.BuildIntrospectionQuery(), variables, &result)
 
+		// Start database to dump graph
+		database := database.NewDatabase("file:sqlite3?_fk=1")
+		client, err := database.Connect()
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
 
-		defer sqlClient.Close()
-
-
-		if err := sqlClient.Schema.Create(ctx); err != nil {
+		defer client.Close()
+		if err := client.Schema.Create(ctx); err != nil {
 			log.Fatalf("failed creating schema resources: %v", err)
 		}
 
-
-		CreateObjectType(ctx, sqlClient, result)
-
+		CreateObjectType(ctx, client, result)
 	},
 }
 
@@ -40,21 +50,21 @@ func CreateObjectType(ctx context.Context, client *ent.Client, result client.Sch
 	// start versioning schema
 	// Find queryType
 
-	queryTypeName := result.Schema.QueryType.Name
+	//queryTypeName := result.Schema.QueryType.Name
+	//
+	//for _, types := range result.Schema.Types {
+	//	if types.Name ==  queryTypeName {
+	//
+	//		for _, field := range types.Fields {
+	//
+	//			fieldType, err := client.FieldType.Create().SetName("field").Save(ctx)
+	//			fmt.Println(field.Name)
+	//			fmt.Println(field.Description)
+	//		}
+	//	}
+	//}
 
-	for _, types := range result.Schema.Types {
-		if types.Name ==  queryTypeName {
-
-			for _, field := range types.Fields {
-
-				fieldType, err := client.FieldType.Create().SetName("field").Save(ctx)
-				fmt.Println(field.Name)
-				fmt.Println(field.Description)
-			}
-		}
-	}
-
-	o, err = client.ObjectType.Create().SetName("name").AddFields(fieldType).Save(ctx)
+	o, err = client.ObjectType.Create().SetName("name").Save(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed creating user: %v", err)
 	}
