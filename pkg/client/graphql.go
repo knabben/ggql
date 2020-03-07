@@ -8,21 +8,6 @@ import (
 	"strings"
 )
 
-// Example of spec introspection
-//{
-//	"data": {
-//	"__schema": {
-//		"queryType": {
-//			"fields": [
-//			{
-//				"name": "allVessels",
-//				"type": {
-//					"kind": "OBJECT",
-//					"name": "VesselsObjectType"
-//				}
-//			},
-//
-
 type graphQLResponse struct {
 	Data   interface{}
 	Errors []GraphQLError
@@ -42,13 +27,12 @@ type GraphQLErrorResponse struct {
 
 // GraphQL performs a GraphQL request and parses the response
 func (c Client) GraphQL(query string, variables map[string]interface{}, data interface{}) error {
-	url := "http://localhost:8000/graphql/"
 	reqBody, err := json.Marshal(map[string]interface{}{"query": query, "variables": variables})
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
+	req, err := http.NewRequest("POST", c.url, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return err
 	}

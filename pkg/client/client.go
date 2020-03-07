@@ -1,25 +1,25 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"encoding/json"
 )
 
 // Client facilitates making HTTP requests to the GitHub API
 type Client struct {
+	url  string
 	http *http.Client
 }
 
 // NewClient initializes a Client
-func NewClient() *Client {
+func NewClient(url string) *Client {
 	tr := http.DefaultTransport
 	http := &http.Client{Transport: tr}
-	client := &Client{http: http}
+	client := &Client{http: http, url: url}
 	return client
 }
-
 
 func handleResponse(resp *http.Response, data interface{}) error {
 	success := resp.StatusCode >= 200 && resp.StatusCode < 300
@@ -45,7 +45,6 @@ func handleResponse(resp *http.Response, data interface{}) error {
 	}
 	return nil
 }
-
 
 func handleHTTPError(resp *http.Response) error {
 	var message string
