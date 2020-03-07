@@ -16,8 +16,29 @@ type FieldType struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
-	Name               string `json:"name,omitempty"`
+	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the FieldTypeQuery when eager-loading is set.
+	Edges              FieldTypeEdges `json:"edges"`
 	object_type_fields *int
+}
+
+// FieldTypeEdges holds the relations/edges for other nodes in the graph.
+type FieldTypeEdges struct {
+	// Arguments holds the value of the arguments edge.
+	Arguments []*Argument
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// ArgumentsOrErr returns the Arguments value or an error if the edge
+// was not loaded in eager-loading.
+func (e FieldTypeEdges) ArgumentsOrErr() ([]*Argument, error) {
+	if e.loadedTypes[0] {
+		return e.Arguments, nil
+	}
+	return nil, &NotLoadedError{edge: "arguments"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -62,6 +83,11 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryArguments queries the arguments edge of the FieldType.
+func (ft *FieldType) QueryArguments() *ArgumentQuery {
+	return (&FieldTypeClient{ft.config}).QueryArguments(ft)
 }
 
 // Update returns a builder for updating this FieldType.

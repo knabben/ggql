@@ -8,19 +8,41 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/knabben/ggql/ent/argument"
 	"github.com/knabben/ggql/ent/fieldtype"
 )
 
 // FieldTypeCreate is the builder for creating a FieldType entity.
 type FieldTypeCreate struct {
 	config
-	name *string
+	name      *string
+	arguments map[int]struct{}
 }
 
 // SetName sets the name field.
 func (ftc *FieldTypeCreate) SetName(s string) *FieldTypeCreate {
 	ftc.name = &s
 	return ftc
+}
+
+// AddArgumentIDs adds the arguments edge to Argument by ids.
+func (ftc *FieldTypeCreate) AddArgumentIDs(ids ...int) *FieldTypeCreate {
+	if ftc.arguments == nil {
+		ftc.arguments = make(map[int]struct{})
+	}
+	for i := range ids {
+		ftc.arguments[ids[i]] = struct{}{}
+	}
+	return ftc
+}
+
+// AddArguments adds the arguments edges to Argument.
+func (ftc *FieldTypeCreate) AddArguments(a ...*Argument) *FieldTypeCreate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return ftc.AddArgumentIDs(ids...)
 }
 
 // Save creates the FieldType in the database.
@@ -58,6 +80,25 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldName,
 		})
 		ft.Name = *value
+	}
+	if nodes := ftc.arguments; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fieldtype.ArgumentsTable,
+			Columns: []string{fieldtype.ArgumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: argument.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

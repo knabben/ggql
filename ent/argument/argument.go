@@ -22,3 +22,8 @@ var Columns = []string{
 	FieldName,
 	FieldKind,
 }
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the Argument type.
+var ForeignKeys = []string{
+	"field_type_arguments",
+}

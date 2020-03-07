@@ -232,6 +232,20 @@ func (c *FieldTypeClient) GetX(ctx context.Context, id int) *FieldType {
 	return ft
 }
 
+// QueryArguments queries the arguments edge of a FieldType.
+func (c *FieldTypeClient) QueryArguments(ft *FieldType) *ArgumentQuery {
+	query := &ArgumentQuery{config: c.config}
+	id := ft.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(fieldtype.Table, fieldtype.FieldID, id),
+		sqlgraph.To(argument.Table, argument.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, fieldtype.ArgumentsTable, fieldtype.ArgumentsColumn),
+	)
+	query.sql = sqlgraph.Neighbors(ft.driver.Dialect(), step)
+
+	return query
+}
+
 // ObjectTypeClient is a client for the ObjectType schema.
 type ObjectTypeClient struct {
 	config

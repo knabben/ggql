@@ -12,6 +12,13 @@ const (
 
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
+	// ArgumentsTable is the table the holds the arguments relation/edge.
+	ArgumentsTable = "arguments"
+	// ArgumentsInverseTable is the table name for the Argument entity.
+	// It exists in this package in order to avoid circular dependency with the "argument" package.
+	ArgumentsInverseTable = "arguments"
+	// ArgumentsColumn is the table column denoting the arguments relation/edge.
+	ArgumentsColumn = "field_type_arguments"
 )
 
 // Columns holds all SQL columns for fieldtype fields.

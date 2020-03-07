@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -11,6 +12,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/knabben/ggql/ent/argument"
 	"github.com/knabben/ggql/ent/fieldtype"
 	"github.com/knabben/ggql/ent/predicate"
 )
@@ -23,7 +25,9 @@ type FieldTypeQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.FieldType
-	withFKs    bool
+	// eager-loading edges.
+	withArguments *ArgumentQuery
+	withFKs       bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -50,6 +54,18 @@ func (ftq *FieldTypeQuery) Offset(offset int) *FieldTypeQuery {
 func (ftq *FieldTypeQuery) Order(o ...Order) *FieldTypeQuery {
 	ftq.order = append(ftq.order, o...)
 	return ftq
+}
+
+// QueryArguments chains the current query on the arguments edge.
+func (ftq *FieldTypeQuery) QueryArguments() *ArgumentQuery {
+	query := &ArgumentQuery{config: ftq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(fieldtype.Table, fieldtype.FieldID, ftq.sqlQuery()),
+		sqlgraph.To(argument.Table, argument.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, fieldtype.ArgumentsTable, fieldtype.ArgumentsColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(ftq.driver.Dialect(), step)
+	return query
 }
 
 // First returns the first FieldType entity in the query. Returns *NotFoundError when no fieldtype was found.
@@ -221,6 +237,17 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 	}
 }
 
+//  WithArguments tells the query-builder to eager-loads the nodes that are connected to
+// the "arguments" edge. The optional arguments used to configure the query builder of the edge.
+func (ftq *FieldTypeQuery) WithArguments(opts ...func(*ArgumentQuery)) *FieldTypeQuery {
+	query := &ArgumentQuery{config: ftq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	ftq.withArguments = query
+	return ftq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -264,9 +291,12 @@ func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSele
 
 func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
 	var (
-		nodes   = []*FieldType{}
-		withFKs = ftq.withFKs
-		_spec   = ftq.querySpec()
+		nodes       = []*FieldType{}
+		withFKs     = ftq.withFKs
+		_spec       = ftq.querySpec()
+		loadedTypes = [1]bool{
+			ftq.withArguments != nil,
+		}
 	)
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, fieldtype.ForeignKeys...)
@@ -285,6 +315,7 @@ func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, ftq.driver, _spec); err != nil {
@@ -293,6 +324,35 @@ func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := ftq.withArguments; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*FieldType)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Argument(func(s *sql.Selector) {
+			s.Where(sql.InValues(fieldtype.ArgumentsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.field_type_arguments
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "field_type_arguments" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "field_type_arguments" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Arguments = append(node.Edges.Arguments, n)
+		}
+	}
+
 	return nodes, nil
 }
 

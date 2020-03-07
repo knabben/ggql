@@ -52,15 +52,27 @@ func ExampleFieldType() {
 	defer drv.Close()
 	client := NewClient(Driver(drv))
 	// creating vertices for the fieldtype's edges.
+	a0 := client.Argument.
+		Create().
+		SetName("string").
+		SetKind("string").
+		SaveX(ctx)
+	log.Println("argument created:", a0)
 
 	// create fieldtype vertex with its edges.
 	ft := client.FieldType.
 		Create().
 		SetName("string").
+		AddArguments(a0).
 		SaveX(ctx)
 	log.Println("fieldtype created:", ft)
 
 	// query edges.
+	a0, err = ft.QueryArguments().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying arguments: %v", err)
+	}
+	log.Println("arguments found:", a0)
 
 	// Output:
 }

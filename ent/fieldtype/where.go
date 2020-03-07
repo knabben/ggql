@@ -4,6 +4,7 @@ package fieldtype
 
 import (
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/knabben/ggql/ent/predicate"
 )
 
@@ -205,6 +206,34 @@ func NameEqualFold(v string) predicate.FieldType {
 func NameContainsFold(v string) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldName), v))
+	})
+}
+
+// HasArguments applies the HasEdge predicate on the "arguments" edge.
+func HasArguments() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ArgumentsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ArgumentsTable, ArgumentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasArgumentsWith applies the HasEdge predicate on the "arguments" edge with a given conditions (other predicates).
+func HasArgumentsWith(preds ...predicate.Argument) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ArgumentsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ArgumentsTable, ArgumentsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

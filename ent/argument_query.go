@@ -23,6 +23,7 @@ type ArgumentQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Argument
+	withFKs    bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -263,13 +264,20 @@ func (aq *ArgumentQuery) Select(field string, fields ...string) *ArgumentSelect 
 
 func (aq *ArgumentQuery) sqlAll(ctx context.Context) ([]*Argument, error) {
 	var (
-		nodes = []*Argument{}
-		_spec = aq.querySpec()
+		nodes   = []*Argument{}
+		withFKs = aq.withFKs
+		_spec   = aq.querySpec()
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, argument.ForeignKeys...)
+	}
 	_spec.ScanValues = func() []interface{} {
 		node := &Argument{config: aq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {

@@ -8,6 +8,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/knabben/ggql/ent/argument"
 	"github.com/knabben/ggql/ent/fieldtype"
 	"github.com/knabben/ggql/ent/predicate"
 )
@@ -15,8 +16,10 @@ import (
 // FieldTypeUpdate is the builder for updating FieldType entities.
 type FieldTypeUpdate struct {
 	config
-	name       *string
-	predicates []predicate.FieldType
+	name             *string
+	arguments        map[int]struct{}
+	removedArguments map[int]struct{}
+	predicates       []predicate.FieldType
 }
 
 // Where adds a new predicate for the builder.
@@ -29,6 +32,46 @@ func (ftu *FieldTypeUpdate) Where(ps ...predicate.FieldType) *FieldTypeUpdate {
 func (ftu *FieldTypeUpdate) SetName(s string) *FieldTypeUpdate {
 	ftu.name = &s
 	return ftu
+}
+
+// AddArgumentIDs adds the arguments edge to Argument by ids.
+func (ftu *FieldTypeUpdate) AddArgumentIDs(ids ...int) *FieldTypeUpdate {
+	if ftu.arguments == nil {
+		ftu.arguments = make(map[int]struct{})
+	}
+	for i := range ids {
+		ftu.arguments[ids[i]] = struct{}{}
+	}
+	return ftu
+}
+
+// AddArguments adds the arguments edges to Argument.
+func (ftu *FieldTypeUpdate) AddArguments(a ...*Argument) *FieldTypeUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return ftu.AddArgumentIDs(ids...)
+}
+
+// RemoveArgumentIDs removes the arguments edge to Argument by ids.
+func (ftu *FieldTypeUpdate) RemoveArgumentIDs(ids ...int) *FieldTypeUpdate {
+	if ftu.removedArguments == nil {
+		ftu.removedArguments = make(map[int]struct{})
+	}
+	for i := range ids {
+		ftu.removedArguments[ids[i]] = struct{}{}
+	}
+	return ftu
+}
+
+// RemoveArguments removes arguments edges to Argument.
+func (ftu *FieldTypeUpdate) RemoveArguments(a ...*Argument) *FieldTypeUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return ftu.RemoveArgumentIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -83,6 +126,44 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldName,
 		})
 	}
+	if nodes := ftu.removedArguments; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fieldtype.ArgumentsTable,
+			Columns: []string{fieldtype.ArgumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: argument.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ftu.arguments; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fieldtype.ArgumentsTable,
+			Columns: []string{fieldtype.ArgumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: argument.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -95,14 +176,56 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // FieldTypeUpdateOne is the builder for updating a single FieldType entity.
 type FieldTypeUpdateOne struct {
 	config
-	id   int
-	name *string
+	id               int
+	name             *string
+	arguments        map[int]struct{}
+	removedArguments map[int]struct{}
 }
 
 // SetName sets the name field.
 func (ftuo *FieldTypeUpdateOne) SetName(s string) *FieldTypeUpdateOne {
 	ftuo.name = &s
 	return ftuo
+}
+
+// AddArgumentIDs adds the arguments edge to Argument by ids.
+func (ftuo *FieldTypeUpdateOne) AddArgumentIDs(ids ...int) *FieldTypeUpdateOne {
+	if ftuo.arguments == nil {
+		ftuo.arguments = make(map[int]struct{})
+	}
+	for i := range ids {
+		ftuo.arguments[ids[i]] = struct{}{}
+	}
+	return ftuo
+}
+
+// AddArguments adds the arguments edges to Argument.
+func (ftuo *FieldTypeUpdateOne) AddArguments(a ...*Argument) *FieldTypeUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return ftuo.AddArgumentIDs(ids...)
+}
+
+// RemoveArgumentIDs removes the arguments edge to Argument by ids.
+func (ftuo *FieldTypeUpdateOne) RemoveArgumentIDs(ids ...int) *FieldTypeUpdateOne {
+	if ftuo.removedArguments == nil {
+		ftuo.removedArguments = make(map[int]struct{})
+	}
+	for i := range ids {
+		ftuo.removedArguments[ids[i]] = struct{}{}
+	}
+	return ftuo
+}
+
+// RemoveArguments removes arguments edges to Argument.
+func (ftuo *FieldTypeUpdateOne) RemoveArguments(a ...*Argument) *FieldTypeUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return ftuo.RemoveArgumentIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -150,6 +273,44 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 			Value:  *value,
 			Column: fieldtype.FieldName,
 		})
+	}
+	if nodes := ftuo.removedArguments; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fieldtype.ArgumentsTable,
+			Columns: []string{fieldtype.ArgumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: argument.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ftuo.arguments; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fieldtype.ArgumentsTable,
+			Columns: []string{fieldtype.ArgumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: argument.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	ft = &FieldType{config: ftuo.config}
 	_spec.Assign = ft.assignValues

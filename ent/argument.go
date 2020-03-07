@@ -18,7 +18,8 @@ type Argument struct {
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Kind holds the value of the "kind" field.
-	Kind string `json:"kind,omitempty"`
+	Kind                 string `json:"kind,omitempty"`
+	field_type_arguments *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -27,6 +28,13 @@ func (*Argument) scanValues() []interface{} {
 		&sql.NullInt64{},  // id
 		&sql.NullString{}, // name
 		&sql.NullString{}, // kind
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Argument) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // field_type_arguments
 	}
 }
 
@@ -51,6 +59,15 @@ func (a *Argument) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field kind", values[1])
 	} else if value.Valid {
 		a.Kind = value.String
+	}
+	values = values[2:]
+	if len(values) == len(argument.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field field_type_arguments", value)
+		} else if value.Valid {
+			a.field_type_arguments = new(int)
+			*a.field_type_arguments = int(value.Int64)
+		}
 	}
 	return nil
 }
