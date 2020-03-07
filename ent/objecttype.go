@@ -17,6 +17,27 @@ type ObjectType struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ObjectTypeQuery when eager-loading is set.
+	Edges ObjectTypeEdges `json:"edges"`
+}
+
+// ObjectTypeEdges holds the relations/edges for other nodes in the graph.
+type ObjectTypeEdges struct {
+	// Fields holds the value of the fields edge.
+	Fields []*FieldType
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// FieldsOrErr returns the Fields value or an error if the edge
+// was not loaded in eager-loading.
+func (e ObjectTypeEdges) FieldsOrErr() ([]*FieldType, error) {
+	if e.loadedTypes[0] {
+		return e.Fields, nil
+	}
+	return nil, &NotLoadedError{edge: "fields"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -45,6 +66,11 @@ func (ot *ObjectType) assignValues(values ...interface{}) error {
 		ot.Name = value.String
 	}
 	return nil
+}
+
+// QueryFields queries the fields edge of the ObjectType.
+func (ot *ObjectType) QueryFields() *FieldTypeQuery {
+	return (&ObjectTypeClient{ot.config}).QueryFields(ot)
 }
 
 // Update returns a builder for updating this ObjectType.

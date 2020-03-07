@@ -9,10 +9,13 @@ import (
 
 	"github.com/knabben/ggql/ent/migrate"
 
+	"github.com/knabben/ggql/ent/argument"
+	"github.com/knabben/ggql/ent/fieldtype"
 	"github.com/knabben/ggql/ent/objecttype"
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -20,6 +23,10 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Argument is the client for interacting with the Argument builders.
+	Argument *ArgumentClient
+	// FieldType is the client for interacting with the FieldType builders.
+	FieldType *FieldTypeClient
 	// ObjectType is the client for interacting with the ObjectType builders.
 	ObjectType *ObjectTypeClient
 }
@@ -31,6 +38,8 @@ func NewClient(opts ...Option) *Client {
 	return &Client{
 		config:     c,
 		Schema:     migrate.NewSchema(c.driver),
+		Argument:   NewArgumentClient(c),
+		FieldType:  NewFieldTypeClient(c),
 		ObjectType: NewObjectTypeClient(c),
 	}
 }
@@ -63,6 +72,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := config{driver: tx, log: c.log, debug: c.debug}
 	return &Tx{
 		config:     cfg,
+		Argument:   NewArgumentClient(cfg),
+		FieldType:  NewFieldTypeClient(cfg),
 		ObjectType: NewObjectTypeClient(cfg),
 	}, nil
 }
@@ -70,7 +81,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		ObjectType.
+//		Argument.
 //		Query().
 //		Count(ctx)
 //
@@ -82,6 +93,8 @@ func (c *Client) Debug() *Client {
 	return &Client{
 		config:     cfg,
 		Schema:     migrate.NewSchema(cfg.driver),
+		Argument:   NewArgumentClient(cfg),
+		FieldType:  NewFieldTypeClient(cfg),
 		ObjectType: NewObjectTypeClient(cfg),
 	}
 }
@@ -89,6 +102,134 @@ func (c *Client) Debug() *Client {
 // Close closes the database connection and prevents new queries from starting.
 func (c *Client) Close() error {
 	return c.driver.Close()
+}
+
+// ArgumentClient is a client for the Argument schema.
+type ArgumentClient struct {
+	config
+}
+
+// NewArgumentClient returns a client for the Argument from the given config.
+func NewArgumentClient(c config) *ArgumentClient {
+	return &ArgumentClient{config: c}
+}
+
+// Create returns a create builder for Argument.
+func (c *ArgumentClient) Create() *ArgumentCreate {
+	return &ArgumentCreate{config: c.config}
+}
+
+// Update returns an update builder for Argument.
+func (c *ArgumentClient) Update() *ArgumentUpdate {
+	return &ArgumentUpdate{config: c.config}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ArgumentClient) UpdateOne(a *Argument) *ArgumentUpdateOne {
+	return c.UpdateOneID(a.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ArgumentClient) UpdateOneID(id int) *ArgumentUpdateOne {
+	return &ArgumentUpdateOne{config: c.config, id: id}
+}
+
+// Delete returns a delete builder for Argument.
+func (c *ArgumentClient) Delete() *ArgumentDelete {
+	return &ArgumentDelete{config: c.config}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ArgumentClient) DeleteOne(a *Argument) *ArgumentDeleteOne {
+	return c.DeleteOneID(a.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ArgumentClient) DeleteOneID(id int) *ArgumentDeleteOne {
+	return &ArgumentDeleteOne{c.Delete().Where(argument.ID(id))}
+}
+
+// Create returns a query builder for Argument.
+func (c *ArgumentClient) Query() *ArgumentQuery {
+	return &ArgumentQuery{config: c.config}
+}
+
+// Get returns a Argument entity by its id.
+func (c *ArgumentClient) Get(ctx context.Context, id int) (*Argument, error) {
+	return c.Query().Where(argument.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ArgumentClient) GetX(ctx context.Context, id int) *Argument {
+	a, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return a
+}
+
+// FieldTypeClient is a client for the FieldType schema.
+type FieldTypeClient struct {
+	config
+}
+
+// NewFieldTypeClient returns a client for the FieldType from the given config.
+func NewFieldTypeClient(c config) *FieldTypeClient {
+	return &FieldTypeClient{config: c}
+}
+
+// Create returns a create builder for FieldType.
+func (c *FieldTypeClient) Create() *FieldTypeCreate {
+	return &FieldTypeCreate{config: c.config}
+}
+
+// Update returns an update builder for FieldType.
+func (c *FieldTypeClient) Update() *FieldTypeUpdate {
+	return &FieldTypeUpdate{config: c.config}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FieldTypeClient) UpdateOne(ft *FieldType) *FieldTypeUpdateOne {
+	return c.UpdateOneID(ft.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FieldTypeClient) UpdateOneID(id int) *FieldTypeUpdateOne {
+	return &FieldTypeUpdateOne{config: c.config, id: id}
+}
+
+// Delete returns a delete builder for FieldType.
+func (c *FieldTypeClient) Delete() *FieldTypeDelete {
+	return &FieldTypeDelete{config: c.config}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *FieldTypeClient) DeleteOne(ft *FieldType) *FieldTypeDeleteOne {
+	return c.DeleteOneID(ft.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *FieldTypeClient) DeleteOneID(id int) *FieldTypeDeleteOne {
+	return &FieldTypeDeleteOne{c.Delete().Where(fieldtype.ID(id))}
+}
+
+// Create returns a query builder for FieldType.
+func (c *FieldTypeClient) Query() *FieldTypeQuery {
+	return &FieldTypeQuery{config: c.config}
+}
+
+// Get returns a FieldType entity by its id.
+func (c *FieldTypeClient) Get(ctx context.Context, id int) (*FieldType, error) {
+	return c.Query().Where(fieldtype.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FieldTypeClient) GetX(ctx context.Context, id int) *FieldType {
+	ft, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return ft
 }
 
 // ObjectTypeClient is a client for the ObjectType schema.
@@ -153,4 +294,18 @@ func (c *ObjectTypeClient) GetX(ctx context.Context, id int) *ObjectType {
 		panic(err)
 	}
 	return ot
+}
+
+// QueryFields queries the fields edge of a ObjectType.
+func (c *ObjectTypeClient) QueryFields(ot *ObjectType) *FieldTypeQuery {
+	query := &FieldTypeQuery{config: c.config}
+	id := ot.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(objecttype.Table, objecttype.FieldID, id),
+		sqlgraph.To(fieldtype.Table, fieldtype.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, objecttype.FieldsTable, objecttype.FieldsColumn),
+	)
+	query.sql = sqlgraph.Neighbors(ot.driver.Dialect(), step)
+
+	return query
 }

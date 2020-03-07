@@ -8,6 +8,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/knabben/ggql/ent/fieldtype"
 	"github.com/knabben/ggql/ent/objecttype"
 	"github.com/knabben/ggql/ent/predicate"
 )
@@ -15,8 +16,10 @@ import (
 // ObjectTypeUpdate is the builder for updating ObjectType entities.
 type ObjectTypeUpdate struct {
 	config
-	name       *string
-	predicates []predicate.ObjectType
+	name          *string
+	fields        map[int]struct{}
+	removedFields map[int]struct{}
+	predicates    []predicate.ObjectType
 }
 
 // Where adds a new predicate for the builder.
@@ -37,6 +40,46 @@ func (otu *ObjectTypeUpdate) SetNillableName(s *string) *ObjectTypeUpdate {
 		otu.SetName(*s)
 	}
 	return otu
+}
+
+// AddFieldIDs adds the fields edge to FieldType by ids.
+func (otu *ObjectTypeUpdate) AddFieldIDs(ids ...int) *ObjectTypeUpdate {
+	if otu.fields == nil {
+		otu.fields = make(map[int]struct{})
+	}
+	for i := range ids {
+		otu.fields[ids[i]] = struct{}{}
+	}
+	return otu
+}
+
+// AddFields adds the fields edges to FieldType.
+func (otu *ObjectTypeUpdate) AddFields(f ...*FieldType) *ObjectTypeUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return otu.AddFieldIDs(ids...)
+}
+
+// RemoveFieldIDs removes the fields edge to FieldType by ids.
+func (otu *ObjectTypeUpdate) RemoveFieldIDs(ids ...int) *ObjectTypeUpdate {
+	if otu.removedFields == nil {
+		otu.removedFields = make(map[int]struct{})
+	}
+	for i := range ids {
+		otu.removedFields[ids[i]] = struct{}{}
+	}
+	return otu
+}
+
+// RemoveFields removes fields edges to FieldType.
+func (otu *ObjectTypeUpdate) RemoveFields(f ...*FieldType) *ObjectTypeUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return otu.RemoveFieldIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -91,6 +134,44 @@ func (otu *ObjectTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: objecttype.FieldName,
 		})
 	}
+	if nodes := otu.removedFields; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   objecttype.FieldsTable,
+			Columns: []string{objecttype.FieldsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := otu.fields; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   objecttype.FieldsTable,
+			Columns: []string{objecttype.FieldsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, otu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -103,8 +184,10 @@ func (otu *ObjectTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // ObjectTypeUpdateOne is the builder for updating a single ObjectType entity.
 type ObjectTypeUpdateOne struct {
 	config
-	id   int
-	name *string
+	id            int
+	name          *string
+	fields        map[int]struct{}
+	removedFields map[int]struct{}
 }
 
 // SetName sets the name field.
@@ -119,6 +202,46 @@ func (otuo *ObjectTypeUpdateOne) SetNillableName(s *string) *ObjectTypeUpdateOne
 		otuo.SetName(*s)
 	}
 	return otuo
+}
+
+// AddFieldIDs adds the fields edge to FieldType by ids.
+func (otuo *ObjectTypeUpdateOne) AddFieldIDs(ids ...int) *ObjectTypeUpdateOne {
+	if otuo.fields == nil {
+		otuo.fields = make(map[int]struct{})
+	}
+	for i := range ids {
+		otuo.fields[ids[i]] = struct{}{}
+	}
+	return otuo
+}
+
+// AddFields adds the fields edges to FieldType.
+func (otuo *ObjectTypeUpdateOne) AddFields(f ...*FieldType) *ObjectTypeUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return otuo.AddFieldIDs(ids...)
+}
+
+// RemoveFieldIDs removes the fields edge to FieldType by ids.
+func (otuo *ObjectTypeUpdateOne) RemoveFieldIDs(ids ...int) *ObjectTypeUpdateOne {
+	if otuo.removedFields == nil {
+		otuo.removedFields = make(map[int]struct{})
+	}
+	for i := range ids {
+		otuo.removedFields[ids[i]] = struct{}{}
+	}
+	return otuo
+}
+
+// RemoveFields removes fields edges to FieldType.
+func (otuo *ObjectTypeUpdateOne) RemoveFields(f ...*FieldType) *ObjectTypeUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return otuo.RemoveFieldIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -166,6 +289,44 @@ func (otuo *ObjectTypeUpdateOne) sqlSave(ctx context.Context) (ot *ObjectType, e
 			Value:  *value,
 			Column: objecttype.FieldName,
 		})
+	}
+	if nodes := otuo.removedFields; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   objecttype.FieldsTable,
+			Columns: []string{objecttype.FieldsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := otuo.fields; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   objecttype.FieldsTable,
+			Columns: []string{objecttype.FieldsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	ot = &ObjectType{config: otuo.config}
 	_spec.Assign = ot.assignValues

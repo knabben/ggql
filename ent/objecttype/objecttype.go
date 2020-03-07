@@ -16,6 +16,13 @@ const (
 
 	// Table holds the table name of the objecttype in the database.
 	Table = "object_types"
+	// FieldsTable is the table the holds the fields relation/edge.
+	FieldsTable = "field_types"
+	// FieldsInverseTable is the table name for the FieldType entity.
+	// It exists in this package in order to avoid circular dependency with the "fieldtype" package.
+	FieldsInverseTable = "field_types"
+	// FieldsColumn is the table column denoting the fields relation/edge.
+	FieldsColumn = "object_type_fields"
 )
 
 // Columns holds all SQL columns for objecttype fields.

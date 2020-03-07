@@ -10,6 +10,40 @@ import (
 )
 
 var (
+	// ArgumentsColumns holds the columns for the "arguments" table.
+	ArgumentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "kind", Type: field.TypeString},
+	}
+	// ArgumentsTable holds the schema information for the "arguments" table.
+	ArgumentsTable = &schema.Table{
+		Name:        "arguments",
+		Columns:     ArgumentsColumns,
+		PrimaryKey:  []*schema.Column{ArgumentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// FieldTypesColumns holds the columns for the "field_types" table.
+	FieldTypesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "object_type_fields", Type: field.TypeInt, Nullable: true},
+	}
+	// FieldTypesTable holds the schema information for the "field_types" table.
+	FieldTypesTable = &schema.Table{
+		Name:       "field_types",
+		Columns:    FieldTypesColumns,
+		PrimaryKey: []*schema.Column{FieldTypesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "field_types_object_types_fields",
+				Columns: []*schema.Column{FieldTypesColumns[2]},
+
+				RefColumns: []*schema.Column{ObjectTypesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// ObjectTypesColumns holds the columns for the "object_types" table.
 	ObjectTypesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -24,9 +58,12 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ArgumentsTable,
+		FieldTypesTable,
 		ObjectTypesTable,
 	}
 )
 
 func init() {
+	FieldTypesTable.ForeignKeys[0].RefTable = ObjectTypesTable
 }

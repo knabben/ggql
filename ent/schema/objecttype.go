@@ -3,6 +3,7 @@ package schema
 import (
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebookincubator/ent/schema/edge"
 )
 
 // ObjectType holds the schema definition for the ObjectType entity.
@@ -19,5 +20,7 @@ func (ObjectType) Fields() []ent.Field {
 
 // Edges of the ObjectType.
 func (ObjectType) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("fields", FieldType.Type),
+	}
 }

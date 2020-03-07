@@ -7,13 +7,15 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/knabben/ggql/ent/fieldtype"
 	"github.com/knabben/ggql/ent/objecttype"
 )
 
 // ObjectTypeCreate is the builder for creating a ObjectType entity.
 type ObjectTypeCreate struct {
 	config
-	name *string
+	name   *string
+	fields map[int]struct{}
 }
 
 // SetName sets the name field.
@@ -28,6 +30,26 @@ func (otc *ObjectTypeCreate) SetNillableName(s *string) *ObjectTypeCreate {
 		otc.SetName(*s)
 	}
 	return otc
+}
+
+// AddFieldIDs adds the fields edge to FieldType by ids.
+func (otc *ObjectTypeCreate) AddFieldIDs(ids ...int) *ObjectTypeCreate {
+	if otc.fields == nil {
+		otc.fields = make(map[int]struct{})
+	}
+	for i := range ids {
+		otc.fields[ids[i]] = struct{}{}
+	}
+	return otc
+}
+
+// AddFields adds the fields edges to FieldType.
+func (otc *ObjectTypeCreate) AddFields(f ...*FieldType) *ObjectTypeCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return otc.AddFieldIDs(ids...)
 }
 
 // Save creates the ObjectType in the database.
@@ -66,6 +88,25 @@ func (otc *ObjectTypeCreate) sqlSave(ctx context.Context) (*ObjectType, error) {
 			Column: objecttype.FieldName,
 		})
 		ot.Name = *value
+	}
+	if nodes := otc.fields; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   objecttype.FieldsTable,
+			Columns: []string{objecttype.FieldsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if err := sqlgraph.CreateNode(ctx, otc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

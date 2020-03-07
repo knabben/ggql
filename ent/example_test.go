@@ -15,6 +15,55 @@ import (
 //
 var dsn string
 
+func ExampleArgument() {
+	if dsn == "" {
+		return
+	}
+	ctx := context.Background()
+	drv, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatalf("failed creating database client: %v", err)
+	}
+	defer drv.Close()
+	client := NewClient(Driver(drv))
+	// creating vertices for the argument's edges.
+
+	// create argument vertex with its edges.
+	a := client.Argument.
+		Create().
+		SetName("string").
+		SetKind("string").
+		SaveX(ctx)
+	log.Println("argument created:", a)
+
+	// query edges.
+
+	// Output:
+}
+func ExampleFieldType() {
+	if dsn == "" {
+		return
+	}
+	ctx := context.Background()
+	drv, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatalf("failed creating database client: %v", err)
+	}
+	defer drv.Close()
+	client := NewClient(Driver(drv))
+	// creating vertices for the fieldtype's edges.
+
+	// create fieldtype vertex with its edges.
+	ft := client.FieldType.
+		Create().
+		SetName("string").
+		SaveX(ctx)
+	log.Println("fieldtype created:", ft)
+
+	// query edges.
+
+	// Output:
+}
 func ExampleObjectType() {
 	if dsn == "" {
 		return
@@ -27,15 +76,26 @@ func ExampleObjectType() {
 	defer drv.Close()
 	client := NewClient(Driver(drv))
 	// creating vertices for the objecttype's edges.
+	ft0 := client.FieldType.
+		Create().
+		SetName("string").
+		SaveX(ctx)
+	log.Println("fieldtype created:", ft0)
 
 	// create objecttype vertex with its edges.
 	ot := client.ObjectType.
 		Create().
 		SetName("string").
+		AddFields(ft0).
 		SaveX(ctx)
 	log.Println("objecttype created:", ot)
 
 	// query edges.
+	ft0, err = ot.QueryFields().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying fields: %v", err)
+	}
+	log.Println("fields found:", ft0)
 
 	// Output:
 }

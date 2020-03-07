@@ -12,6 +12,10 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Argument is the client for interacting with the Argument builders.
+	Argument *ArgumentClient
+	// FieldType is the client for interacting with the FieldType builders.
+	FieldType *FieldTypeClient
 	// ObjectType is the client for interacting with the ObjectType builders.
 	ObjectType *ObjectTypeClient
 }
@@ -31,6 +35,8 @@ func (tx *Tx) Client() *Client {
 	return &Client{
 		config:     tx.config,
 		Schema:     migrate.NewSchema(tx.driver),
+		Argument:   NewArgumentClient(tx.config),
+		FieldType:  NewFieldTypeClient(tx.config),
 		ObjectType: NewObjectTypeClient(tx.config),
 	}
 }
@@ -42,7 +48,7 @@ func (tx *Tx) Client() *Client {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: ObjectType.QueryXXX(), the query will be executed
+// applies a query, for example: Argument.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

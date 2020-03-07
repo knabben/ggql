@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -11,6 +12,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/knabben/ggql/ent/fieldtype"
 	"github.com/knabben/ggql/ent/objecttype"
 	"github.com/knabben/ggql/ent/predicate"
 )
@@ -23,6 +25,8 @@ type ObjectTypeQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.ObjectType
+	// eager-loading edges.
+	withFields *FieldTypeQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -49,6 +53,18 @@ func (otq *ObjectTypeQuery) Offset(offset int) *ObjectTypeQuery {
 func (otq *ObjectTypeQuery) Order(o ...Order) *ObjectTypeQuery {
 	otq.order = append(otq.order, o...)
 	return otq
+}
+
+// QueryFields chains the current query on the fields edge.
+func (otq *ObjectTypeQuery) QueryFields() *FieldTypeQuery {
+	query := &FieldTypeQuery{config: otq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(objecttype.Table, objecttype.FieldID, otq.sqlQuery()),
+		sqlgraph.To(fieldtype.Table, fieldtype.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, objecttype.FieldsTable, objecttype.FieldsColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(otq.driver.Dialect(), step)
+	return query
 }
 
 // First returns the first ObjectType entity in the query. Returns *NotFoundError when no objecttype was found.
@@ -220,6 +236,17 @@ func (otq *ObjectTypeQuery) Clone() *ObjectTypeQuery {
 	}
 }
 
+//  WithFields tells the query-builder to eager-loads the nodes that are connected to
+// the "fields" edge. The optional arguments used to configure the query builder of the edge.
+func (otq *ObjectTypeQuery) WithFields(opts ...func(*FieldTypeQuery)) *ObjectTypeQuery {
+	query := &FieldTypeQuery{config: otq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	otq.withFields = query
+	return otq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -263,8 +290,11 @@ func (otq *ObjectTypeQuery) Select(field string, fields ...string) *ObjectTypeSe
 
 func (otq *ObjectTypeQuery) sqlAll(ctx context.Context) ([]*ObjectType, error) {
 	var (
-		nodes = []*ObjectType{}
-		_spec = otq.querySpec()
+		nodes       = []*ObjectType{}
+		_spec       = otq.querySpec()
+		loadedTypes = [1]bool{
+			otq.withFields != nil,
+		}
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &ObjectType{config: otq.config}
@@ -277,6 +307,7 @@ func (otq *ObjectTypeQuery) sqlAll(ctx context.Context) ([]*ObjectType, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, otq.driver, _spec); err != nil {
@@ -285,6 +316,35 @@ func (otq *ObjectTypeQuery) sqlAll(ctx context.Context) ([]*ObjectType, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := otq.withFields; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*ObjectType)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.FieldType(func(s *sql.Selector) {
+			s.Where(sql.InValues(objecttype.FieldsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.object_type_fields
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "object_type_fields" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "object_type_fields" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Fields = append(node.Edges.Fields, n)
+		}
+	}
+
 	return nodes, nil
 }
 
