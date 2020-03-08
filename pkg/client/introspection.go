@@ -1,7 +1,5 @@
 package client
 
-import "github.com/graphql-go/graphql"
-
 var (
 	introspectionQuery = `
 query IntrospectionQuery {
@@ -109,12 +107,25 @@ fragment TypeRef on __Type {
 `
 )
 
+type ArgumentDefinition struct {
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Type        map[string]interface{} `json:"type"`
+}
+
 type FieldDefinition struct {
 	Name              string                 `json:"name"`
 	Description       string                 `json:"description"`
 	Type              map[string]interface{} `json:"type"`
-	Args              []*graphql.Argument    `json:"args"`
+	Args              []ArgumentDefinition   `json:"args"`
 	DeprecationReason string                 `json:"deprecationReason"`
+}
+
+type TypeDefinition struct {
+	Kind        string            `json:"kind"`
+	Name        string            `json:"name"`
+	Description string            `json:"description"`
+	Fields      []FieldDefinition `json:"fields"`
 }
 
 type Schema struct {
@@ -122,11 +133,7 @@ type Schema struct {
 		QueryType struct {
 			Name string `json:"name"`
 		} `json:"queryType"`
-		Types []struct {
-			Kind   string            `json:"kind"`
-			Name   string            `json:"name"`
-			Fields []FieldDefinition `json:"fields"`
-		} `json:"types"`
+		Types []TypeDefinition `json:"types""`
 	} `json:"__schema"`
 }
 
