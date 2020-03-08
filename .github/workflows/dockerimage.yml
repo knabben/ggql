@@ -1,7 +1,7 @@
 name: Docker Image CI
 
 env:
-  IMAGE_NAME: ggql:latest
+  IMAGE_NAME: ggql
 
 on:
   push:
@@ -18,15 +18,29 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag $IMAGE_NAME
+      run: docker build . --file Dockerfile --tag image
 
     - name: Run tests
-      run: docker run --entrypoint go $IMAGE_NAME test ./...
+      run: docker run --entrypoint go image test ./...
 
     - name: Log into registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-
+    
     - name: Push image
       run: |
-        docker tag gql:latest docker.pkg.github.com/knabben/ggql/$IMAGE_NAME
-        docker push docker.pkg.github.com/knabben/ggql/$IMAGE_NAME
+        IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+  
+        # Strip git ref prefix from version
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+  
+        # Strip "v" prefix from tag name
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+  
+        # Use Docker `latest` tag convention
+        [ "$VERSION" == "master" ] && VERSION=latest
+  
+        echo IMAGE_ID=$IMAGE_ID
+        echo VERSION=$VERSION
+  
+        docker tag image $IMAGE_ID:$VERSION
+        docker push $IMAGE_ID:$VERSION
