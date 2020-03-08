@@ -1,7 +1,7 @@
 name: Docker Image CI
 
 env:
-  IMAGE_NAME: gql:latest
+  IMAGE_NAME: ggql:latest
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
       run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
     - name: Run tests
-      run: docker run -it --entrypoint go $IMAGE_NAME test ./...
+      run: docker run --entrypoint go $IMAGE_NAME test ./...
 
     - name: Log into registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
