@@ -17,13 +17,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag $IMAGE_NAME
+      run: docker build . --file Dockerfile --tag gql:latest
 
     - name: Log into registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
   
     - name: Push image
       run: |
-        IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
-        docker tag $IMAGE_NAME $IMAGE_ID
-        docker push $IMAGE_ID
+        docker tag gql:latest docker.pkg.github.com/knabben/ggql/gql:latest
+        docker push docker.pkg.github.com/knabben/ggql/gql:latest
