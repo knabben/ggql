@@ -11,8 +11,8 @@ const (
 	FieldName = "name"
 	// FieldDescription holds the string denoting the description vertex property in the database.
 	FieldDescription = "description"
-	// FieldIsDeprecated holds the string denoting the is_deprecated vertex property in the database.
-	FieldIsDeprecated = "is_deprecated"
+	// FieldDeprecatedReason holds the string denoting the deprecated_reason vertex property in the database.
+	FieldDeprecatedReason = "deprecated_reason"
 	// FieldTypeKind holds the string denoting the type_kind vertex property in the database.
 	FieldTypeKind = "type_kind"
 	// FieldTypeName holds the string denoting the type_name vertex property in the database.
@@ -34,7 +34,7 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldDescription,
-	FieldIsDeprecated,
+	FieldDeprecatedReason,
 	FieldTypeKind,
 	FieldTypeName,
 }

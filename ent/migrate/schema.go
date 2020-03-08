@@ -37,9 +37,9 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString},
-		{Name: "is_deprecated", Type: field.TypeBool},
-		{Name: "type_kind", Type: field.TypeBool},
-		{Name: "type_name", Type: field.TypeBool},
+		{Name: "deprecated_reason", Type: field.TypeString},
+		{Name: "type_kind", Type: field.TypeString},
+		{Name: "type_name", Type: field.TypeString},
 		{Name: "object_type_fields", Type: field.TypeInt, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.

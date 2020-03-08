@@ -68,9 +68,9 @@ func ExampleFieldType() {
 		Create().
 		SetName("string").
 		SetDescription("string").
-		SetIsDeprecated(true).
-		SetTypeKind(true).
-		SetTypeName(true).
+		SetDeprecatedReason("string").
+		SetTypeKind("string").
+		SetTypeName("string").
 		AddArguments(a0).
 		SaveX(ctx)
 	log.Println("fieldtype created:", ft)
@@ -100,9 +100,9 @@ func ExampleObjectType() {
 		Create().
 		SetName("string").
 		SetDescription("string").
-		SetIsDeprecated(true).
-		SetTypeKind(true).
-		SetTypeName(true).
+		SetDeprecatedReason("string").
+		SetTypeKind("string").
+		SetTypeName("string").
 		SaveX(ctx)
 	log.Println("fieldtype created:", ft0)
 

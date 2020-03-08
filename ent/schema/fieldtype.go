@@ -16,9 +16,9 @@ func (FieldType) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
 		field.String("description"),
-		field.Bool("is_deprecated"),
-		field.Bool("type_kind"),
-		field.Bool("type_name"),
+		field.String("deprecated_reason"),
+		field.String("type_kind"),
+		field.String("type_name"),
 	}
 }
 

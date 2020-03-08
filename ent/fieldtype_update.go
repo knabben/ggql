@@ -16,14 +16,14 @@ import (
 // FieldTypeUpdate is the builder for updating FieldType entities.
 type FieldTypeUpdate struct {
 	config
-	name             *string
-	description      *string
-	is_deprecated    *bool
-	type_kind        *bool
-	type_name        *bool
-	arguments        map[int]struct{}
-	removedArguments map[int]struct{}
-	predicates       []predicate.FieldType
+	name              *string
+	description       *string
+	deprecated_reason *string
+	type_kind         *string
+	type_name         *string
+	arguments         map[int]struct{}
+	removedArguments  map[int]struct{}
+	predicates        []predicate.FieldType
 }
 
 // Where adds a new predicate for the builder.
@@ -44,21 +44,21 @@ func (ftu *FieldTypeUpdate) SetDescription(s string) *FieldTypeUpdate {
 	return ftu
 }
 
-// SetIsDeprecated sets the is_deprecated field.
-func (ftu *FieldTypeUpdate) SetIsDeprecated(b bool) *FieldTypeUpdate {
-	ftu.is_deprecated = &b
+// SetDeprecatedReason sets the deprecated_reason field.
+func (ftu *FieldTypeUpdate) SetDeprecatedReason(s string) *FieldTypeUpdate {
+	ftu.deprecated_reason = &s
 	return ftu
 }
 
 // SetTypeKind sets the type_kind field.
-func (ftu *FieldTypeUpdate) SetTypeKind(b bool) *FieldTypeUpdate {
-	ftu.type_kind = &b
+func (ftu *FieldTypeUpdate) SetTypeKind(s string) *FieldTypeUpdate {
+	ftu.type_kind = &s
 	return ftu
 }
 
 // SetTypeName sets the type_name field.
-func (ftu *FieldTypeUpdate) SetTypeName(b bool) *FieldTypeUpdate {
-	ftu.type_name = &b
+func (ftu *FieldTypeUpdate) SetTypeName(s string) *FieldTypeUpdate {
+	ftu.type_name = &s
 	return ftu
 }
 
@@ -161,23 +161,23 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldDescription,
 		})
 	}
-	if value := ftu.is_deprecated; value != nil {
+	if value := ftu.deprecated_reason; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
+			Type:   field.TypeString,
 			Value:  *value,
-			Column: fieldtype.FieldIsDeprecated,
+			Column: fieldtype.FieldDeprecatedReason,
 		})
 	}
 	if value := ftu.type_kind; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
+			Type:   field.TypeString,
 			Value:  *value,
 			Column: fieldtype.FieldTypeKind,
 		})
 	}
 	if value := ftu.type_name; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
+			Type:   field.TypeString,
 			Value:  *value,
 			Column: fieldtype.FieldTypeName,
 		})
@@ -232,14 +232,14 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // FieldTypeUpdateOne is the builder for updating a single FieldType entity.
 type FieldTypeUpdateOne struct {
 	config
-	id               int
-	name             *string
-	description      *string
-	is_deprecated    *bool
-	type_kind        *bool
-	type_name        *bool
-	arguments        map[int]struct{}
-	removedArguments map[int]struct{}
+	id                int
+	name              *string
+	description       *string
+	deprecated_reason *string
+	type_kind         *string
+	type_name         *string
+	arguments         map[int]struct{}
+	removedArguments  map[int]struct{}
 }
 
 // SetName sets the name field.
@@ -254,21 +254,21 @@ func (ftuo *FieldTypeUpdateOne) SetDescription(s string) *FieldTypeUpdateOne {
 	return ftuo
 }
 
-// SetIsDeprecated sets the is_deprecated field.
-func (ftuo *FieldTypeUpdateOne) SetIsDeprecated(b bool) *FieldTypeUpdateOne {
-	ftuo.is_deprecated = &b
+// SetDeprecatedReason sets the deprecated_reason field.
+func (ftuo *FieldTypeUpdateOne) SetDeprecatedReason(s string) *FieldTypeUpdateOne {
+	ftuo.deprecated_reason = &s
 	return ftuo
 }
 
 // SetTypeKind sets the type_kind field.
-func (ftuo *FieldTypeUpdateOne) SetTypeKind(b bool) *FieldTypeUpdateOne {
-	ftuo.type_kind = &b
+func (ftuo *FieldTypeUpdateOne) SetTypeKind(s string) *FieldTypeUpdateOne {
+	ftuo.type_kind = &s
 	return ftuo
 }
 
 // SetTypeName sets the type_name field.
-func (ftuo *FieldTypeUpdateOne) SetTypeName(b bool) *FieldTypeUpdateOne {
-	ftuo.type_name = &b
+func (ftuo *FieldTypeUpdateOne) SetTypeName(s string) *FieldTypeUpdateOne {
+	ftuo.type_name = &s
 	return ftuo
 }
 
@@ -365,23 +365,23 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 			Column: fieldtype.FieldDescription,
 		})
 	}
-	if value := ftuo.is_deprecated; value != nil {
+	if value := ftuo.deprecated_reason; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
+			Type:   field.TypeString,
 			Value:  *value,
-			Column: fieldtype.FieldIsDeprecated,
+			Column: fieldtype.FieldDeprecatedReason,
 		})
 	}
 	if value := ftuo.type_kind; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
+			Type:   field.TypeString,
 			Value:  *value,
 			Column: fieldtype.FieldTypeKind,
 		})
 	}
 	if value := ftuo.type_name; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
+			Type:   field.TypeString,
 			Value:  *value,
 			Column: fieldtype.FieldTypeName,
 		})

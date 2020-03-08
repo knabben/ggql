@@ -105,22 +105,22 @@ func Description(v string) predicate.FieldType {
 	})
 }
 
-// IsDeprecated applies equality check predicate on the "is_deprecated" field. It's identical to IsDeprecatedEQ.
-func IsDeprecated(v bool) predicate.FieldType {
+// DeprecatedReason applies equality check predicate on the "deprecated_reason" field. It's identical to DeprecatedReasonEQ.
+func DeprecatedReason(v string) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIsDeprecated), v))
+		s.Where(sql.EQ(s.C(FieldDeprecatedReason), v))
 	})
 }
 
 // TypeKind applies equality check predicate on the "type_kind" field. It's identical to TypeKindEQ.
-func TypeKind(v bool) predicate.FieldType {
+func TypeKind(v string) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldTypeKind), v))
 	})
 }
 
 // TypeName applies equality check predicate on the "type_name" field. It's identical to TypeNameEQ.
-func TypeName(v bool) predicate.FieldType {
+func TypeName(v string) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldTypeName), v))
 	})
@@ -348,45 +348,336 @@ func DescriptionContainsFold(v string) predicate.FieldType {
 	})
 }
 
-// IsDeprecatedEQ applies the EQ predicate on the "is_deprecated" field.
-func IsDeprecatedEQ(v bool) predicate.FieldType {
+// DeprecatedReasonEQ applies the EQ predicate on the "deprecated_reason" field.
+func DeprecatedReasonEQ(v string) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIsDeprecated), v))
+		s.Where(sql.EQ(s.C(FieldDeprecatedReason), v))
 	})
 }
 
-// IsDeprecatedNEQ applies the NEQ predicate on the "is_deprecated" field.
-func IsDeprecatedNEQ(v bool) predicate.FieldType {
+// DeprecatedReasonNEQ applies the NEQ predicate on the "deprecated_reason" field.
+func DeprecatedReasonNEQ(v string) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIsDeprecated), v))
+		s.Where(sql.NEQ(s.C(FieldDeprecatedReason), v))
+	})
+}
+
+// DeprecatedReasonIn applies the In predicate on the "deprecated_reason" field.
+func DeprecatedReasonIn(vs ...string) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDeprecatedReason), v...))
+	})
+}
+
+// DeprecatedReasonNotIn applies the NotIn predicate on the "deprecated_reason" field.
+func DeprecatedReasonNotIn(vs ...string) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDeprecatedReason), v...))
+	})
+}
+
+// DeprecatedReasonGT applies the GT predicate on the "deprecated_reason" field.
+func DeprecatedReasonGT(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDeprecatedReason), v))
+	})
+}
+
+// DeprecatedReasonGTE applies the GTE predicate on the "deprecated_reason" field.
+func DeprecatedReasonGTE(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDeprecatedReason), v))
+	})
+}
+
+// DeprecatedReasonLT applies the LT predicate on the "deprecated_reason" field.
+func DeprecatedReasonLT(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDeprecatedReason), v))
+	})
+}
+
+// DeprecatedReasonLTE applies the LTE predicate on the "deprecated_reason" field.
+func DeprecatedReasonLTE(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDeprecatedReason), v))
+	})
+}
+
+// DeprecatedReasonContains applies the Contains predicate on the "deprecated_reason" field.
+func DeprecatedReasonContains(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDeprecatedReason), v))
+	})
+}
+
+// DeprecatedReasonHasPrefix applies the HasPrefix predicate on the "deprecated_reason" field.
+func DeprecatedReasonHasPrefix(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDeprecatedReason), v))
+	})
+}
+
+// DeprecatedReasonHasSuffix applies the HasSuffix predicate on the "deprecated_reason" field.
+func DeprecatedReasonHasSuffix(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDeprecatedReason), v))
+	})
+}
+
+// DeprecatedReasonEqualFold applies the EqualFold predicate on the "deprecated_reason" field.
+func DeprecatedReasonEqualFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDeprecatedReason), v))
+	})
+}
+
+// DeprecatedReasonContainsFold applies the ContainsFold predicate on the "deprecated_reason" field.
+func DeprecatedReasonContainsFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDeprecatedReason), v))
 	})
 }
 
 // TypeKindEQ applies the EQ predicate on the "type_kind" field.
-func TypeKindEQ(v bool) predicate.FieldType {
+func TypeKindEQ(v string) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldTypeKind), v))
 	})
 }
 
 // TypeKindNEQ applies the NEQ predicate on the "type_kind" field.
-func TypeKindNEQ(v bool) predicate.FieldType {
+func TypeKindNEQ(v string) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldTypeKind), v))
 	})
 }
 
+// TypeKindIn applies the In predicate on the "type_kind" field.
+func TypeKindIn(vs ...string) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTypeKind), v...))
+	})
+}
+
+// TypeKindNotIn applies the NotIn predicate on the "type_kind" field.
+func TypeKindNotIn(vs ...string) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTypeKind), v...))
+	})
+}
+
+// TypeKindGT applies the GT predicate on the "type_kind" field.
+func TypeKindGT(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTypeKind), v))
+	})
+}
+
+// TypeKindGTE applies the GTE predicate on the "type_kind" field.
+func TypeKindGTE(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTypeKind), v))
+	})
+}
+
+// TypeKindLT applies the LT predicate on the "type_kind" field.
+func TypeKindLT(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTypeKind), v))
+	})
+}
+
+// TypeKindLTE applies the LTE predicate on the "type_kind" field.
+func TypeKindLTE(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTypeKind), v))
+	})
+}
+
+// TypeKindContains applies the Contains predicate on the "type_kind" field.
+func TypeKindContains(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldTypeKind), v))
+	})
+}
+
+// TypeKindHasPrefix applies the HasPrefix predicate on the "type_kind" field.
+func TypeKindHasPrefix(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldTypeKind), v))
+	})
+}
+
+// TypeKindHasSuffix applies the HasSuffix predicate on the "type_kind" field.
+func TypeKindHasSuffix(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldTypeKind), v))
+	})
+}
+
+// TypeKindEqualFold applies the EqualFold predicate on the "type_kind" field.
+func TypeKindEqualFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldTypeKind), v))
+	})
+}
+
+// TypeKindContainsFold applies the ContainsFold predicate on the "type_kind" field.
+func TypeKindContainsFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldTypeKind), v))
+	})
+}
+
 // TypeNameEQ applies the EQ predicate on the "type_name" field.
-func TypeNameEQ(v bool) predicate.FieldType {
+func TypeNameEQ(v string) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldTypeName), v))
 	})
 }
 
 // TypeNameNEQ applies the NEQ predicate on the "type_name" field.
-func TypeNameNEQ(v bool) predicate.FieldType {
+func TypeNameNEQ(v string) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldTypeName), v))
+	})
+}
+
+// TypeNameIn applies the In predicate on the "type_name" field.
+func TypeNameIn(vs ...string) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTypeName), v...))
+	})
+}
+
+// TypeNameNotIn applies the NotIn predicate on the "type_name" field.
+func TypeNameNotIn(vs ...string) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTypeName), v...))
+	})
+}
+
+// TypeNameGT applies the GT predicate on the "type_name" field.
+func TypeNameGT(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTypeName), v))
+	})
+}
+
+// TypeNameGTE applies the GTE predicate on the "type_name" field.
+func TypeNameGTE(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTypeName), v))
+	})
+}
+
+// TypeNameLT applies the LT predicate on the "type_name" field.
+func TypeNameLT(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTypeName), v))
+	})
+}
+
+// TypeNameLTE applies the LTE predicate on the "type_name" field.
+func TypeNameLTE(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTypeName), v))
+	})
+}
+
+// TypeNameContains applies the Contains predicate on the "type_name" field.
+func TypeNameContains(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldTypeName), v))
+	})
+}
+
+// TypeNameHasPrefix applies the HasPrefix predicate on the "type_name" field.
+func TypeNameHasPrefix(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldTypeName), v))
+	})
+}
+
+// TypeNameHasSuffix applies the HasSuffix predicate on the "type_name" field.
+func TypeNameHasSuffix(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldTypeName), v))
+	})
+}
+
+// TypeNameEqualFold applies the EqualFold predicate on the "type_name" field.
+func TypeNameEqualFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldTypeName), v))
+	})
+}
+
+// TypeNameContainsFold applies the ContainsFold predicate on the "type_name" field.
+func TypeNameContainsFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldTypeName), v))
 	})
 }
 

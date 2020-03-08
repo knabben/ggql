@@ -35,7 +35,7 @@ var scrapeCmd = &cobra.Command{
 		c.GraphQL(client.BuildIntrospectionQuery(), variables, &result)
 
 		// Start database to dump graph
-		database := database.NewDatabase(sqlite)
+		database := database.NewDatabase(uri)
 		client, err := database.Connect()
 		if err != nil {
 			log.Fatalf("%v", err)
