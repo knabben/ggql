@@ -9,6 +9,8 @@ import (
 	"github.com/knabben/ggql/pkg/graphql"
 	"github.com/spf13/cobra"
 	"log"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
