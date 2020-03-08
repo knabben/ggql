@@ -1,7 +1,7 @@
 name: Docker Image CI
 
 env:
-  IMAGE_NAME: ggql
+  IMAGE_NAME: gql:latest
 
 on:
   push:
@@ -16,13 +16,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag gql:latest
+      run: docker build . --file Dockerfile --tag $IMAGE_NAME
+
+    - name: Run tests
+      run: docker run -it --entrypoint go $IMAGE_NAME test ./...
 
     - name: Log into registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-  
+
     - name: Push image
       run: |
-        docker tag gql:latest docker.pkg.github.com/knabben/ggql/gql:latest
-        docker push docker.pkg.github.com/knabben/ggql/gql:latest
+        docker tag gql:latest docker.pkg.github.com/knabben/ggql/$IMAGE_NAME
+        docker push docker.pkg.github.com/knabben/ggql/$IMAGE_NAME
