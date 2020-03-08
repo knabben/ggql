@@ -6,6 +6,7 @@ import (
 
 type Database struct {
 	dbURI string
+	client *ent.Client
 }
 
 func NewDatabase(uri string) *Database {
@@ -17,5 +18,6 @@ func (d *Database) Connect() (*ent.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	d.client = c
 	return c, nil
 }

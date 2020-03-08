@@ -22,8 +22,12 @@ var diffCmd = &cobra.Command{
 	Short: "diff",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Diff")
+		
+
 	},
 }
+
+
 
 func QueryObjectType(ctx context.Context, client *ent.Client) (*ent.ObjectType, error) {
 	o := client.ObjectType.Query().Where(objecttype.NameEQ("name")).OnlyX(ctx)
