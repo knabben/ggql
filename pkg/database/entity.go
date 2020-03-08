@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/knabben/ggql/ent"
+	"github.com/knabben/ggql/ent/objecttype"
 	"github.com/knabben/ggql/pkg/graphql"
 	"log"
 )
@@ -46,7 +47,7 @@ func (d *Database) CreateFields(types graphql.TypeDefinition) []*ent.FieldType {
 			Save(ctx)
 
 		if err != nil {
-			log.Println("Not adding this field %s: %s", field.Name, err)
+			fmt.Sprintf("Not adding this field %s: %s", field.Name, err)
 			continue
 		}
 		fields = append(fields, fieldType)
@@ -94,11 +95,18 @@ func (d *Database) CreateArguments(field graphql.FieldDefinition) []*ent.Argumen
 			Save(ctx)
 
 		if err != nil {
-			log.Println("Not adding this argument %s: %s", arg.Name, err)
+			fmt.Sprintf("Not adding this argument %s: %s", arg.Name, err)
 			continue
 		}
 		arguments = append(arguments, argumentType)
 	}
 
 	return arguments
+}
+
+
+func QueryObjectType(ctx context.Context, client *ent.Client) (*ent.ObjectType, error) {
+	o := client.ObjectType.Query().Where(objecttype.NameEQ("name")).OnlyX(ctx)
+	log.Println("objecttype: ", o)
+	return o, nil
 }
