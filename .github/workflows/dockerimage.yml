@@ -22,6 +22,9 @@ jobs:
 
     - name: Run tests
       run: docker run --entrypoint go image test ./...
+  
+    - name: Run linter
+      run: docker run --entrypoint golangci-lint image run
 
     - name: Log into registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
