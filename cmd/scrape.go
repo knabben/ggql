@@ -34,7 +34,10 @@ var scrapeCmd = &cobra.Command{
 		var uri = fmt.Sprintf("file:%s?_fk=1", sqlite)
 
 		// GraphQL client request and response serializer
-		c.NewClient(url).GraphQL(graphql.BuildIntrospectionQuery(), variables, &result)
+		err := c.NewClient(url).GraphQL(graphql.BuildIntrospectionQuery(), variables, &result)
+		if err != nil {
+			log.Fatalf("Trying to fetch GraphQL endpoint %s", err)
+		}
 
 		if result.Schema.QueryType.Name == "" {
 			log.Fatalf("Error trying to fetch schema.")

@@ -11,7 +11,7 @@ var (
 )
 
 type FieldError struct {
-	Field   ent.FieldType
+	Field   interface{}
 	Message string
 }
 
@@ -19,7 +19,7 @@ func compareObjectType(source, destination ent.ObjectType) bool {
 	return reflect.DeepEqual(source, destination)
 }
 
-func hasElement(source ent.FieldType, fieldtype []ent.FieldType) bool {
+func hasElement(source interface{}, fieldtype []interface{}) bool {
 	for _, field := range fieldtype {
 		if reflect.DeepEqual(source, field) {
 			return true
@@ -28,10 +28,33 @@ func hasElement(source ent.FieldType, fieldtype []ent.FieldType) bool {
 	return false
 }
 
+// compareFieldType used to compare two lists of fields
 func compareFieldType(source, destination []ent.FieldType) ([]FieldError, []FieldError) {
+	sourceInterface := make([]interface{}, len(source))
+	for i, d := range source { sourceInterface[i] = d}
+
+	destInterface := make([]interface{}, len(destination))
+	for i, d := range destination { destInterface[i] = d }
+
+	return compareItems(sourceInterface, destInterface)
+}
+
+//// compareArgument used to compare two lists of a field argument
+//func compareArgument(source, destination []ent.Argument) ([]FieldError, []FieldError) {
+//	sourceInterface := make([]interface{}, len(source))
+//	for i, d := range source { sourceInterface[i] = d }
+//
+//	destInterface := make([]interface{}, len(destination))
+//	for i, d := range destination { destInterface[i] = d }
+//
+//	return compareItems(sourceInterface, destInterface)
+//}
+
+// compareItems
+func compareItems(source, destination []interface{}) ([]FieldError, []FieldError) {
 	var (
 		removed = []FieldError{}
-		added  = []FieldError{}
+		added = []FieldError{}
 	)
 
 	for _, sourceField := range source {

@@ -47,7 +47,7 @@ func (d *Database) CreateFields(types graphql.TypeDefinition) []*ent.FieldType {
 			Save(ctx)
 
 		if err != nil {
-			fmt.Sprintf("Not adding this field %s: %s", field.Name, err)
+			fmt.Println(fmt.Sprintf("Not adding this field %s: %s", field.Name, err))
 			continue
 		}
 		fields = append(fields, fieldType)
@@ -95,7 +95,7 @@ func (d *Database) CreateArguments(field graphql.FieldDefinition) []*ent.Argumen
 			Save(ctx)
 
 		if err != nil {
-			fmt.Sprintf("Not adding this argument %s: %s", arg.Name, err)
+			fmt.Println(fmt.Sprintf("Not adding this argument %s: %s", arg.Name, err))
 			continue
 		}
 		arguments = append(arguments, argumentType)

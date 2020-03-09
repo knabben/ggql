@@ -133,7 +133,7 @@ type Schema struct {
 		QueryType struct {
 			Name string `json:"name"`
 		} `json:"queryType"`
-		Types []TypeDefinition `json:"types""`
+		Types []TypeDefinition `json:"types"`
 	} `json:"__schema"`
 }
 
