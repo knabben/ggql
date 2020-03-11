@@ -13,13 +13,31 @@ From the features we can enumerate:
 * Integration with your actual Github Workflow.
 * Free schema versioning through sqlite3 storage.
 
-Scraping schema
+Standalone
+---
+
+It is possible to use the system in a standalone mode, using the binary.
+
+### Direct endpoint
+
+Generating the dump via a GraphQL endpoint:
+
+```
+$ ./gql scrape --url https://www.example.com/graphql 
+```
+
+### Existent dump
+
+Some libraries like Graphene can dump the schema, so it can be used in the CI without
+the necessity of running the service.
+
+```
+$ python manage.py graphql_schema
+$ ./gql scrape --file schema.json 
+```
+
+
+Scraping schema - GH Action
 ---
 
 [knabben/gql-pull](https://github.com/knabben/gql-pull)
-
-
-Compare and generate artifact
----
-
-[knabben/gql-diff](https://github.com/knabben/gql-diff)
