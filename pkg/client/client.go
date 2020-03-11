@@ -33,7 +33,7 @@ func handleResponse(resp *http.Response, data interface{}) error {
 		return err
 	}
 
-	gr := &graphQLResponse{Data: data}
+	gr := &GraphQLResponse{Data: data}
 	err = json.Unmarshal(body, &gr)
 
 	if err != nil {

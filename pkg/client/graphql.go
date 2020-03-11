@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-type graphQLResponse struct {
-	Data   interface{}
+type GraphQLResponse struct {
+	Data   interface{} `json:"data"`
 	Errors []GraphQLError
 }
 
