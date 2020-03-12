@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"github.com/knabben/ggql/pkg/graphql"
 	"io/ioutil"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type Parse struct {
