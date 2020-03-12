@@ -9,8 +9,20 @@ type Database struct {
 	client *ent.Client
 }
 
-func NewDatabase(uri string) *Database {
-	return &Database{dbURI: uri}
+// NewDatabase create a new schema and connect
+func NewDatabase(uri string) (*Database, error) {
+	db := &Database{dbURI: uri}
+	client, err := db.Connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := client.Schema.Create(ctx); err != nil {
+		return nil, err
+	}
+	db.client = client
+	return db, nil
 }
 
 func (d *Database) Connect() (*ent.Client, error) {
@@ -18,6 +30,5 @@ func (d *Database) Connect() (*ent.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	d.client = c
 	return c, nil
 }

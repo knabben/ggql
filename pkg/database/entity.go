@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/knabben/ggql/ent"
-	"github.com/knabben/ggql/ent/objecttype"
 	"github.com/knabben/ggql/pkg/graphql"
 	"log"
 )
+
 var ctx = context.Background()
 
 // DumpSchema traverse the graph
@@ -58,7 +58,6 @@ func (d *Database) CreateFields(types graphql.TypeDefinition) []*ent.FieldType {
 
 // CreateObjectType convert the schema to a graph and dump in the database
 func (d *Database) CreateObjectType(ctx context.Context, result graphql.Schema) (o *ent.ObjectType, err error) {
-
 	for _, types := range result.Schema.Types {
 		if types.Name == result.Schema.QueryType.Name {
 			o, err = d.client.ObjectType.
@@ -74,8 +73,6 @@ func (d *Database) CreateObjectType(ctx context.Context, result graphql.Schema) 
 			}
 		}
 	}
-
-	log.Println("object was created: ", o)
 	return o, nil
 }
 
@@ -104,12 +101,11 @@ func (d *Database) CreateArguments(field graphql.FieldDefinition) []*ent.Argumen
 	return arguments
 }
 
-
-func (d *Database) QueryObjectTypeFields(ctx context.Context, objectName string) ([]*ent.FieldType, error) {
-	fields, err := d.client.ObjectType.Query().Where(objecttype.NameEQ(objectName)).QueryFields().All(ctx)
-	if err != nil {
-		return nil, err
-	}
-	log.Println("objecttype fields:", fields)
-	return fields, nil
-}
+//func (d *Database) QueryObjectTypeFields(ctx context.Context, objectName string) ([]*ent.FieldType, error) {
+//	fields, err := d.client.ObjectType.Query().Where(objecttype.NameEQ(objectName)).QueryFields().All(ctx)
+//	if err != nil {
+//		return nil, err
+//	}
+//	log.Println("objecttype fields:", fields)
+//	return fields, nil
+//}
