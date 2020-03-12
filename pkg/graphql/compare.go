@@ -106,6 +106,6 @@ func hasElement(source interface{}, fields []interface{}) bool {
 
 func ParsePrintErrors(errors []FieldError) {
 	for _, n := range errors {
-		fmt.Printf("**%s** - %s\n", n.Error, n.Message)
+		fmt.Printf("** %s ** - %s\n", n.Error, n.Message)
 	}
 }
