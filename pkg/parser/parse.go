@@ -1,12 +1,11 @@
 package parser
 
 import (
-	c "github.com/knabben/ggql/pkg/client"
-	"strings"
-	"fmt"
 	"encoding/json"
+	c "github.com/knabben/ggql/pkg/client"
 	"github.com/knabben/ggql/pkg/graphql"
 	"io/ioutil"
+	"strings"
 )
 
 type Parse struct {
@@ -27,7 +26,6 @@ func NewParser(url string) *Parse {
 
 // LoadResult choose from where to load the schema
 func (p *Parse) LoadResult() (graphql.Schema, error) {
-	fmt.Println(p)
 	// Hit the GraphQL endpoint.
 	if p.schemaUrl != "" {
 		return p.parseURLSchema()

@@ -7,14 +7,15 @@ import (
 )
 
 var (
-	ADDED_FIELD      = "ADDED_FIELD"
-	ADDED_ARGUMENT   = "ADDED_ARGUMENT"
-	REMOVED_FIELD    = "REMOVED_FIELD"
-	REMOVED_ARGUMENT = "REMOVED_ARGUMENT"
+	FIELD_ADDED   = "FIELD_ADDED"
+	ARG_ADDED     = "ARG_ADDED"
+	FIELD_REMOVED = "FIELD_REMOVED"
+	ARG_REMOVED   = "ARG_REMOVED"
 )
 
 type FieldError struct {
 	Field   interface{}
+	Error   string
 	Message string
 }
 
@@ -61,9 +62,11 @@ func compareItems(source, destination []interface{}) []FieldError {
 			field := FieldError{Field: sourceField}
 			switch sourceField.(type) {
 			case *ent.Argument:
-				field.Message = ADDED_ARGUMENT
+				field.Error = ARG_ADDED
+
 			case *ent.FieldType:
-				field.Message = ADDED_FIELD
+				field.Message = fmt.Sprintf("%s was added", sourceField.(*ent.FieldType).Name)
+				field.Error = FIELD_ADDED
 			}
 			errors = append(errors, field)
 		}
@@ -73,9 +76,10 @@ func compareItems(source, destination []interface{}) []FieldError {
 			field := FieldError{Field: destField}
 			switch destField.(type) {
 			case *ent.Argument:
-				field.Message = REMOVED_ARGUMENT
+				field.Message = ARG_REMOVED
 			case *ent.FieldType:
-				field.Message = REMOVED_FIELD
+				field.Message = fmt.Sprintf("%s was removed", destField.(*ent.FieldType).Name)
+				field.Error = FIELD_REMOVED
 			}
 			errors = append(errors, field)
 		}
@@ -100,9 +104,8 @@ func hasElement(source interface{}, fields []interface{}) bool {
 	return false
 }
 
-
 func ParsePrintErrors(errors []FieldError) {
 	for _, n := range errors {
-		fmt.Println(n)
+		fmt.Printf("%s - %s\n", n.Error, n.Message)
 	}
 }
