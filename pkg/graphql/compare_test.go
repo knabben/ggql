@@ -73,7 +73,7 @@ func TestGraphQLCompareArguments(t *testing.T) {
 			[]*ent.Argument{{Name: "name1"}, {Name: "name2"}},
 			[]*ent.Argument{{Name: "name2"}},
 			[]FieldError{
-				{Field: &ent.Argument{Name: "name1"}, Error: ARG_ADDED},
+				{Field: &ent.Argument{Name: "name1"}, Message: "", Error: ARG_ADDED},
 			},
 		},
 		{
@@ -82,9 +82,9 @@ func TestGraphQLCompareArguments(t *testing.T) {
 			},
 			[]*ent.Argument{{Name: "name3"}},
 			[]FieldError{
-				{Field: &ent.Argument{Name: "name1"}, Error: ARG_ADDED},
-				{Field: &ent.Argument{Name: "name2"}, Error: ARG_ADDED},
-				{Field: &ent.Argument{Name: "name3"}, Error: ARG_REMOVED},
+				{Field: &ent.Argument{Name: "name1"}, Message: "", Error: ARG_ADDED},
+				{Field: &ent.Argument{Name: "name2"}, Message: "", Error: ARG_ADDED},
+				{Field: &ent.Argument{Name: "name3"}, Message: "", Error: ARG_REMOVED},
 			},
 		},
 	}

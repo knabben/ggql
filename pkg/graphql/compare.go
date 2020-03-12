@@ -76,7 +76,7 @@ func compareItems(source, destination []interface{}) []FieldError {
 			field := FieldError{Field: destField}
 			switch destField.(type) {
 			case *ent.Argument:
-				field.Message = ARG_REMOVED
+				field.Error = ARG_REMOVED
 			case *ent.FieldType:
 				field.Message = fmt.Sprintf("%s was removed", destField.(*ent.FieldType).Name)
 				field.Error = FIELD_REMOVED
