@@ -100,12 +100,3 @@ func (d *Database) CreateArguments(field graphql.FieldDefinition) []*ent.Argumen
 
 	return arguments
 }
-
-//func (d *Database) QueryObjectTypeFields(ctx context.Context, objectName string) ([]*ent.FieldType, error) {
-//	fields, err := d.client.ObjectType.Query().Where(objecttype.NameEQ(objectName)).QueryFields().All(ctx)
-//	if err != nil {
-//		return nil, err
-//	}
-//	log.Println("objecttype fields:", fields)
-//	return fields, nil
-//}

@@ -19,6 +19,7 @@ func NewParser(file, url string) *Parse {
 	}
 }
 
+// LoadResult choose from where to load the schema
 func (p *Parse) LoadResult() (graphql.Schema, error) {
 	// Hit the GraphQL endpoint.
 	if p.schemaUrl != "" {

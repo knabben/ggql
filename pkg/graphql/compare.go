@@ -6,8 +6,10 @@ import (
 )
 
 var (
-	REMOVED_FIELD = "REMOVED_FIELD"
-	ADDED_FIELD   = "ADDED_FIELD"
+	ADDED_FIELD      = "ADDED_FIELD"
+	ADDED_ARGUMENT   = "ADDED_ARGUMENT"
+	REMOVED_FIELD    = "REMOVED_FIELD"
+	REMOVED_ARGUMENT = "REMOVED_ARGUMENT"
 )
 
 type FieldError struct {
@@ -19,55 +21,80 @@ func CompareObjectType(source, destination ent.ObjectType) bool {
 	return reflect.DeepEqual(source, destination)
 }
 
-func hasElement(source *ent.FieldType, fields []*ent.FieldType) bool {
-	for _, field := range fields {
-		if field.Name == source.Name {
-			return true
-		}
+// CompareArgument used to compare two lists of a field argument
+func CompareArguments(source, destination []*ent.Argument) []FieldError {
+	sourceInterface := make([]interface{}, len(source))
+	for i, d := range source {
+		sourceInterface[i] = d
 	}
-	return false
+	destInterface := make([]interface{}, len(destination))
+	for i, d := range destination {
+		destInterface[i] = d
+	}
+
+	return compareItems(sourceInterface, destInterface)
 }
 
-// compareFieldType used to compare two lists of fields
-func CompareFieldType(source, destination []*ent.FieldType) ([]FieldError, []FieldError) {
-	//sourceInterface := make([]interface{}, len(source))
-	//for i, d := range source { sourceInterface[i] = d}
+// CompareFieldType used to compare two lists of fields
+func CompareFieldType(source, destination []*ent.FieldType) []FieldError {
+	sourceInterface := make([]interface{}, len(source))
+	for i, d := range source {
+		sourceInterface[i] = d
+	}
+	destInterface := make([]interface{}, len(destination))
+	for i, d := range destination {
+		destInterface[i] = d
+	}
 
-	//destInterface := make([]interface{}, len(destination))
-	//for i, d := range destination { destInterface[i] = d }
-
-	return compareItems(source, destination)
+	return compareItems(sourceInterface, destInterface)
 }
 
-//// compareArgument used to compare two lists of a field argument
-//func compareArgument(source, destination []ent.Argument) ([]FieldError, []FieldError) {
-//	sourceInterface := make([]interface{}, len(source))
-//	for i, d := range source { sourceInterface[i] = d }
-//
-//	destInterface := make([]interface{}, len(destination))
-//	for i, d := range destination { destInterface[i] = d }
-//
-//	return compareItems(sourceInterface, destInterface)
-//}
-
-// compareItems
-func compareItems(source, destination []*ent.FieldType) ([]FieldError, []FieldError) {
+// compareItems compare different fields and returns the response.
+func compareItems(source, destination []interface{}) []FieldError {
 	var (
-		removed = []FieldError{}
-		added = []FieldError{}
+		errors = []FieldError{}
 	)
 
 	for _, sourceField := range source {
 		if !hasElement(sourceField, destination) {
-			added = append(added, FieldError{Field: sourceField, Message: ADDED_FIELD})
+			field := FieldError{Field: sourceField}
+			switch sourceField.(type) {
+			case *ent.Argument:
+				field.Message = ADDED_ARGUMENT
+			case *ent.FieldType:
+				field.Message = ADDED_FIELD
+			}
+			errors = append(errors, field)
 		}
 	}
-
 	for _, destField := range destination {
 		if !hasElement(destField, source) {
-			removed = append(removed, FieldError{Field: destField, Message: REMOVED_FIELD})
+			field := FieldError{Field: destField}
+			switch destField.(type) {
+			case *ent.Argument:
+				field.Message = REMOVED_ARGUMENT
+			case *ent.FieldType:
+				field.Message = REMOVED_FIELD
+			}
+			errors = append(errors, field)
 		}
 	}
 
-	return added, removed
+	return errors
+}
+
+func hasElement(source interface{}, fields []interface{}) bool {
+	for _, field := range fields {
+		switch field.(type) {
+		case *ent.FieldType:
+			if field.(*ent.FieldType).Name == source.(*ent.FieldType).Name {
+				return true
+			}
+		case *ent.Argument:
+			if field.(*ent.Argument).Name == source.(*ent.Argument).Name {
+				return true
+			}
+		}
+	}
+	return false
 }

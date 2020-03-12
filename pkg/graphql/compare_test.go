@@ -22,18 +22,15 @@ func TestGraphqlCompareObjectType(t *testing.T) {
 	}
 }
 
-func TestGraphqlCompareFields(t *testing.T) {
-
+func TestGraphQLCompareFields(t *testing.T) {
 	var tests = []struct {
 		source      []*ent.FieldType
 		destination []*ent.FieldType
-		added       []FieldError
-		removed     []FieldError
+		errors      []FieldError
 	}{
 		{
 			[]*ent.FieldType{},
 			[]*ent.FieldType{},
-			[]FieldError{},
 			[]FieldError{},
 		},
 		{
@@ -42,24 +39,57 @@ func TestGraphqlCompareFields(t *testing.T) {
 			[]FieldError{
 				{Field: &ent.FieldType{Name: "name1"}, Message: ADDED_FIELD},
 			},
-			[]FieldError{},
 		},
 		{
-			[]*ent.FieldType{{Name: "name1"}, {Name: "name2"}},
+			[]*ent.FieldType{
+				{Name: "name1"}, {Name: "name2"},
+			},
 			[]*ent.FieldType{{Name: "name3"}},
 			[]FieldError{
 				{Field: &ent.FieldType{Name: "name1"}, Message: ADDED_FIELD},
 				{Field: &ent.FieldType{Name: "name2"}, Message: ADDED_FIELD},
-			},
-			[]FieldError{
 				{Field: &ent.FieldType{Name: "name3"}, Message: REMOVED_FIELD},
 			},
 		},
 	}
 
 	for _, test := range tests {
-		added, removed := CompareFieldType(test.source, test.destination)
-		assert.Equal(t, test.added, added)
-		assert.Equal(t, test.removed, removed)
+		assert.Equal(t, test.errors, CompareFieldType(test.source, test.destination))
+	}
+}
+
+func TestGraphQLCompareArguments(t *testing.T) {
+	var tests = []struct {
+		source      []*ent.Argument
+		destination []*ent.Argument
+		errors      []FieldError
+	}{
+		{
+			[]*ent.Argument{},
+			[]*ent.Argument{},
+			[]FieldError{},
+		},
+		{
+			[]*ent.Argument{{Name: "name1"}, {Name: "name2"}},
+			[]*ent.Argument{{Name: "name2"}},
+			[]FieldError{
+				{Field: &ent.Argument{Name: "name1"}, Message: ADDED_ARGUMENT},
+			},
+		},
+		{
+			[]*ent.Argument{
+				{Name: "name1"}, {Name: "name2"},
+			},
+			[]*ent.Argument{{Name: "name3"}},
+			[]FieldError{
+				{Field: &ent.Argument{Name: "name1"}, Message: ADDED_ARGUMENT},
+				{Field: &ent.Argument{Name: "name2"}, Message: ADDED_ARGUMENT},
+				{Field: &ent.Argument{Name: "name3"}, Message: REMOVED_ARGUMENT},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		assert.Equal(t, test.errors, CompareArguments(test.source, test.destination))
 	}
 }
