@@ -2,7 +2,8 @@ package parser
 
 import (
 	c "github.com/knabben/ggql/pkg/client"
-
+	"strings"
+	"fmt"
 	"encoding/json"
 	"github.com/knabben/ggql/pkg/graphql"
 	"io/ioutil"
@@ -12,15 +13,21 @@ type Parse struct {
 	schemaFile, schemaUrl string
 }
 
-func NewParser(file, url string) *Parse {
-	return &Parse{
-		schemaFile: file,
-		schemaUrl:  url,
+func NewParser(url string) *Parse {
+	var parse = &Parse{schemaFile: "", schemaUrl: ""}
+
+	if strings.HasPrefix(url, "http") {
+		parse.schemaUrl = url
+	} else {
+		parse.schemaFile = url
 	}
+
+	return parse
 }
 
 // LoadResult choose from where to load the schema
 func (p *Parse) LoadResult() (graphql.Schema, error) {
+	fmt.Println(p)
 	// Hit the GraphQL endpoint.
 	if p.schemaUrl != "" {
 		return p.parseURLSchema()

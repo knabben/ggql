@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/knabben/ggql/ent"
 	"github.com/knabben/ggql/pkg/database"
 	"github.com/knabben/ggql/pkg/parser"
 	"go.uber.org/zap"
@@ -14,29 +15,57 @@ import (
 )
 
 var (
-	sourceSchemaFile, sourceSchemaUrl string
-	destSchemaFile, destSchemaUrl     string
+	uri = "file:%s?mode=memory&cache=shared&_fk=1"
+
+	source, destination string
 	ctx                               = context.Background()
 )
 
 func init() {
 	diffCmd.Flags().StringVarP(
-		&sourceSchemaFile, "source-file", "s", "", "Source file schema",
+		&source,
+		"source",
+		"s",
+		"",
+		"Source URI can be a JSON or URL",
 	)
 	diffCmd.Flags().StringVarP(
-		&sourceSchemaUrl, "source-url", "u", "", "Source URL schema",
-	)
-
-	diffCmd.Flags().StringVarP(
-		&destSchemaFile, "dest-file", "d", "", "Destination file schema",
-	)
-	diffCmd.Flags().StringVarP(
-		&destSchemaUrl, "dest-url", "e", "", "Destination URL schema",
+		&destination,
+		"destination",
+		"d",
+		"",
+		"Destination file schema",
 	)
 
 	rootCmd.AddCommand(diffCmd)
 }
 
+func StartInternalDatabases(logger *zap.Logger) (*database.Database, *database.Database) {
+	sourceDatabase, err := database.NewDatabase(fmt.Sprintf(uri, "source"))
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+	destDatabase, err := database.NewDatabase(fmt.Sprintf(uri, "destination"))
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+
+	return sourceDatabase, destDatabase
+}
+
+func createObject(logger *zap.Logger, url string, db *database.Database) *ent.ObjectType {
+	parser := parser.NewParser(url)
+	result, err := parser.LoadResult()
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+
+	object, err := db.CreateObjectType(ctx, result)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+	return object
+}
 var diffCmd = &cobra.Command{
 	Use:   "scrape",
 	Short: "scrape",
@@ -44,49 +73,15 @@ var diffCmd = &cobra.Command{
 		logger, _ := zap.NewProduction()
 		defer logger.Sync() // nolint: errcheck
 
-		uri := "file:%s?mode=memory&cache=shared&_fk=1"
+		sourceDatabase, destDatabase := StartInternalDatabases(logger)
 
-		sourceDatabase, err := database.NewDatabase(fmt.Sprintf(uri, "source"))
-		if err != nil {
-			logger.Fatal(err.Error())
-		}
-		destDatabase, err := database.NewDatabase(fmt.Sprintf(uri, "destination"))
-		if err != nil {
-			logger.Fatal(err.Error())
-		}
-
-		sourceParser := parser.NewParser(sourceSchemaFile, sourceSchemaUrl)
-		sourceResult, err := sourceParser.LoadResult()
-		if err != nil {
-			logger.Fatal(err.Error())
-		}
-
-		sourceObject, err := sourceDatabase.CreateObjectType(ctx, sourceResult)
-		if err != nil {
-			logger.Fatal(err.Error())
-		}
-
-		destParser := parser.NewParser(destSchemaFile, destSchemaUrl)
-		destResult, err := destParser.LoadResult()
-		if err != nil {
-			logger.Fatal(err.Error())
-		}
-
-		destObject, err := destDatabase.CreateObjectType(ctx, destResult)
-		if err != nil {
-			logger.Fatal(err.Error())
-		}
+		sourceObject := createObject(logger, source, sourceDatabase)
+		destObject := createObject(logger, destination, destDatabase)
 
 		sourceFields, _ := sourceObject.QueryFields().All(ctx)
 		destFields, _ := destObject.QueryFields().All(ctx)
 
-		added, removed := graphql.CompareFieldType(sourceFields, destFields)
-		for _, n := range added {
-			fmt.Println(n)
-		}
-		fmt.Println("----- removed")
-		for _, n := range removed {
-			fmt.Println(n)
-		}
+		errors := graphql.CompareFieldType(sourceFields, destFields)
+		graphql.ParsePrintErrors(errors)
 	},
 }

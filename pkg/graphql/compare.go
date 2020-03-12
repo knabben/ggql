@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"fmt"
 	"github.com/knabben/ggql/ent"
 	"reflect"
 )
@@ -97,4 +98,11 @@ func hasElement(source interface{}, fields []interface{}) bool {
 		}
 	}
 	return false
+}
+
+
+func ParsePrintErrors(errors []FieldError) {
+	for _, n := range errors {
+		fmt.Println(n)
+	}
 }
