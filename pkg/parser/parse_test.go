@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	file = "../tests/schema.json"
+	file = "parser/tests/schema.json"
 )
 
 func TestParseFileSchema(t *testing.T) {
