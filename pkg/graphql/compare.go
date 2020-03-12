@@ -60,12 +60,12 @@ func compareItems(source, destination []interface{}) []FieldError {
 	for _, sourceField := range source {
 		if !hasElement(sourceField, destination) {
 			field := FieldError{Field: sourceField}
-			switch sourceField.(type) {
+			switch sourceField := sourceField.(type) {
 			case *ent.Argument:
 				field.Error = ARG_ADDED
 
 			case *ent.FieldType:
-				field.Message = fmt.Sprintf("%s was added", sourceField.(*ent.FieldType).Name)
+				field.Message = fmt.Sprintf("%s was added", sourceField.Name)
 				field.Error = FIELD_ADDED
 			}
 			errors = append(errors, field)
@@ -74,11 +74,11 @@ func compareItems(source, destination []interface{}) []FieldError {
 	for _, destField := range destination {
 		if !hasElement(destField, source) {
 			field := FieldError{Field: destField}
-			switch destField.(type) {
+			switch destField := destField.(type) {
 			case *ent.Argument:
 				field.Error = ARG_REMOVED
 			case *ent.FieldType:
-				field.Message = fmt.Sprintf("%s was removed", destField.(*ent.FieldType).Name)
+				field.Message = fmt.Sprintf("%s was removed", destField.Name)
 				field.Error = FIELD_REMOVED
 			}
 			errors = append(errors, field)
