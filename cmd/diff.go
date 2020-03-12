@@ -14,7 +14,6 @@ import (
 )
 
 var (
-	result                            graphql.Schema
 	sourceSchemaFile, sourceSchemaUrl string
 	destSchemaFile, destSchemaUrl     string
 	ctx                               = context.Background()
@@ -43,7 +42,7 @@ var diffCmd = &cobra.Command{
 	Short: "scrape",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger, _ := zap.NewProduction()
-		defer logger.Sync()
+		defer logger.Sync() // nolint: errcheck
 
 		uri := "file:%s?mode=memory&cache=shared&_fk=1"
 
