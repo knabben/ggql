@@ -2,108 +2,92 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"os"
-
-	c "github.com/knabben/ggql/pkg/client"
 	"github.com/knabben/ggql/pkg/database"
+	"github.com/knabben/ggql/pkg/parser"
+	"go.uber.org/zap"
+
 	"github.com/knabben/ggql/pkg/graphql"
 	"github.com/spf13/cobra"
-	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
-	sqlite, file, url string
-	result            graphql.Schema
-	ctx               = context.Background()
-	variables         = map[string]interface{}{}
+	result                            graphql.Schema
+	sourceSchemaFile, sourceSchemaUrl string
+	destSchemaFile, destSchemaUrl     string
+	ctx                               = context.Background()
 )
 
 func init() {
-	scrapeCmd.Flags().StringVarP(&url, "url", "u", "", "GraphQL URI")
-	scrapeCmd.Flags().StringVarP(&file, "file", "f", "", "Schema file")
-	scrapeCmd.Flags().StringVarP(&sqlite, "sqlite", "s", "sqlite3", "SQLite3 database")
+	diffCmd.Flags().StringVarP(
+		&sourceSchemaFile, "source-file", "s", "", "Source file schema",
+	)
+	diffCmd.Flags().StringVarP(
+		&sourceSchemaUrl, "source-url", "u", "", "Source URL schema",
+	)
 
-	rootCmd.AddCommand(scrapeCmd)
+	diffCmd.Flags().StringVarP(
+		&destSchemaFile, "dest-file", "d", "", "Destination file schema",
+	)
+	diffCmd.Flags().StringVarP(
+		&destSchemaUrl, "dest-url", "e", "", "Destination URL schema",
+	)
+
+	rootCmd.AddCommand(diffCmd)
 }
 
-var scrapeCmd = &cobra.Command{
+var diffCmd = &cobra.Command{
 	Use:   "scrape",
 	Short: "scrape",
 	Run: func(cmd *cobra.Command, args []string) {
-		var uri = fmt.Sprintf("file:%s?_fk=1", sqlite)
+		logger, _ := zap.NewProduction()
+		defer logger.Sync()
 
-		loadResult()
+		uri := "file:%s?mode=memory&cache=shared&_fk=1"
 
-		database := database.NewDatabase(uri)
-		client, err := database.Connect()
+		sourceDatabase, err := database.NewDatabase(fmt.Sprintf(uri, "source"))
 		if err != nil {
-			log.Fatalf("%v", err)
+			logger.Fatal(err.Error())
+		}
+		destDatabase, err := database.NewDatabase(fmt.Sprintf(uri, "destination"))
+		if err != nil {
+			logger.Fatal(err.Error())
 		}
 
-		defer client.Close()
-
-		if err := client.Schema.Create(ctx); err != nil {
-			log.Fatalf("failed creating schema resources: %v", err)
-		}
-		_, err = database.CreateObjectType(ctx, result)
+		sourceParser := parser.NewParser(sourceSchemaFile, sourceSchemaUrl)
+		sourceResult, err := sourceParser.LoadResult()
 		if err != nil {
-			log.Fatalf(err.Error())
+			logger.Fatal(err.Error())
+		}
+
+		sourceObject, err := sourceDatabase.CreateObjectType(ctx, sourceResult)
+		if err != nil {
+			logger.Fatal(err.Error())
+		}
+
+		destParser := parser.NewParser(destSchemaFile, destSchemaUrl)
+		destResult, err := destParser.LoadResult()
+		if err != nil {
+			logger.Fatal(err.Error())
+		}
+
+		destObject, err := destDatabase.CreateObjectType(ctx, destResult)
+		if err != nil {
+			logger.Fatal(err.Error())
+		}
+
+		sourceFields, _ := sourceObject.QueryFields().All(ctx)
+		destFields, _ := destObject.QueryFields().All(ctx)
+
+		added, removed := graphql.CompareFieldType(sourceFields, destFields)
+		for _, n := range added {
+			fmt.Println(n)
+		}
+		fmt.Println("----- removed")
+		for _, n := range removed {
+			fmt.Println(n)
 		}
 	},
-}
-
-func loadResult() {
-	if _, err := os.Stat(sqlite); os.IsExist(err) {
-		log.Fatalf("A database already exists.")
-	}
-
-	// Hit the GraphQL endpoint.
-	if url != "" {
-		parseGraphQLRequest()
-
-	}
-
-	// Use file for schema parser
-	if file != "" {
-		parseJSONSchema()
-	}
-
-	if result.Schema.QueryType.Name == "" {
-		log.Fatalf("Error parsing the schema.")
-	}
-}
-
-// parseGraphQLRequest GraphQL endpoint hit and result dump.
-func parseGraphQLRequest() {
-
-	err := c.NewClient(url).GraphQL(graphql.BuildIntrospectionQuery(), variables, &result)
-	if err != nil {
-		log.Fatalf("Trying to fetch GraphQL endpoint %s", err)
-	}
-
-	if result.Schema.QueryType.Name == "" {
-		log.Fatalf("Error trying to fetch schema.")
-	}
-}
-
-// parseJSONSchema parsing the file and dumps the result.
-func parseJSONSchema() error {
-	schema, err := ioutil.ReadFile(file)
-
-	if err != nil {
-		log.Fatalf("Trying to read file: %v", err)
-	}
-
-	gr := &c.GraphQLResponse{Data: &result}
-	err = json.Unmarshal(schema, &gr)
-	if err != nil {
-		log.Fatalf("Trying to unmarshal result: %v", err)
-	}
-
-	return nil
 }
